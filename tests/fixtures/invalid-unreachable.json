@@ -1,0 +1,74 @@
+{
+  "version": 1,
+  "nodes": [
+    {
+      "id": "R",
+      "kind": "source",
+      "label": "R",
+      "pos": {
+        "x": 0,
+        "y": 100
+      }
+    },
+    {
+      "id": "b1",
+      "kind": "block",
+      "gain": "G1",
+      "pos": {
+        "x": 140,
+        "y": 100
+      }
+    },
+    {
+      "id": "p",
+      "kind": "pickoff",
+      "pos": {
+        "x": 280,
+        "y": 100
+      }
+    },
+    {
+      "id": "b2",
+      "kind": "block",
+      "gain": "G2",
+      "pos": {
+        "x": 140,
+        "y": 240
+      }
+    },
+    {
+      "id": "C",
+      "kind": "sink",
+      "label": "C",
+      "pos": {
+        "x": 420,
+        "y": 240
+      }
+    }
+  ],
+  "edges": [
+    {
+      "id": "R->b1",
+      "from": "R",
+      "to": "b1"
+    },
+    {
+      "id": "b1->p",
+      "from": "b1",
+      "to": "p"
+    },
+    {
+      "id": "b2->C",
+      "from": "b2",
+      "to": "C"
+    }
+  ],
+  "symbols": [
+    {
+      "name": "G1"
+    },
+    {
+      "name": "G2"
+    }
+  ]
+}

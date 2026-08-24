@@ -1,0 +1,186 @@
+{
+  "version": 1,
+  "nodes": [
+    {
+      "id": "R",
+      "kind": "source",
+      "label": "R",
+      "pos": {
+        "x": 0,
+        "y": 100
+      }
+    },
+    {
+      "id": "s1",
+      "kind": "sum",
+      "ports": [
+        {
+          "id": "p1",
+          "sign": 1
+        },
+        {
+          "id": "p2",
+          "sign": -1
+        }
+      ],
+      "pos": {
+        "x": 100,
+        "y": 100
+      }
+    },
+    {
+      "id": "bG1",
+      "kind": "block",
+      "gain": "G1",
+      "pos": {
+        "x": 220,
+        "y": 100
+      }
+    },
+    {
+      "id": "p1",
+      "kind": "pickoff",
+      "pos": {
+        "x": 340,
+        "y": 100
+      }
+    },
+    {
+      "id": "s2",
+      "kind": "sum",
+      "ports": [
+        {
+          "id": "p1",
+          "sign": 1
+        },
+        {
+          "id": "p2",
+          "sign": -1
+        }
+      ],
+      "pos": {
+        "x": 440,
+        "y": 100
+      }
+    },
+    {
+      "id": "bG2",
+      "kind": "block",
+      "gain": "G2",
+      "pos": {
+        "x": 560,
+        "y": 100
+      }
+    },
+    {
+      "id": "p2",
+      "kind": "pickoff",
+      "pos": {
+        "x": 680,
+        "y": 100
+      }
+    },
+    {
+      "id": "C",
+      "kind": "sink",
+      "label": "C",
+      "pos": {
+        "x": 780,
+        "y": 100
+      }
+    },
+    {
+      "id": "bH1",
+      "kind": "block",
+      "gain": "H1",
+      "pos": {
+        "x": 220,
+        "y": 210
+      }
+    },
+    {
+      "id": "bH2",
+      "kind": "block",
+      "gain": "H2",
+      "pos": {
+        "x": 560,
+        "y": 210
+      }
+    }
+  ],
+  "edges": [
+    {
+      "id": "R->s1:p1",
+      "from": "R",
+      "to": "s1",
+      "toPort": "p1"
+    },
+    {
+      "id": "s1->bG1",
+      "from": "s1",
+      "to": "bG1"
+    },
+    {
+      "id": "bG1->p1",
+      "from": "bG1",
+      "to": "p1"
+    },
+    {
+      "id": "p1->s2:p1",
+      "from": "p1",
+      "to": "s2",
+      "toPort": "p1"
+    },
+    {
+      "id": "s2->bG2",
+      "from": "s2",
+      "to": "bG2"
+    },
+    {
+      "id": "bG2->p2",
+      "from": "bG2",
+      "to": "p2"
+    },
+    {
+      "id": "p2->C",
+      "from": "p2",
+      "to": "C"
+    },
+    {
+      "id": "p1->bH1",
+      "from": "p1",
+      "to": "bH1"
+    },
+    {
+      "id": "bH1->s1:p2",
+      "from": "bH1",
+      "to": "s1",
+      "toPort": "p2"
+    },
+    {
+      "id": "p2->bH2",
+      "from": "p2",
+      "to": "bH2"
+    },
+    {
+      "id": "bH2->s2:p2",
+      "from": "bH2",
+      "to": "s2",
+      "toPort": "p2"
+    }
+  ],
+  "symbols": [
+    {
+      "name": "G1"
+    },
+    {
+      "name": "G2"
+    },
+    {
+      "name": "H1"
+    },
+    {
+      "name": "H2"
+    }
+  ]
+}

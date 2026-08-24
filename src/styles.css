@@ -1,0 +1,555 @@
+/* Dirección visual: cuaderno de ingeniería. Papel claro, trazo fino, nada de neón. */
+
+:root {
+  --paper: #faf8f3;
+  --paper-2: #f2efe6;
+  --ink: #22201c;
+  --ink-soft: #6b665c;
+  --rule: #d6d2c4;
+  --rule-strong: #b3ab99;
+  --accent: #b4472e; /* lápiz rojo: resaltado y signos negativos */
+  --accent-soft: #f6e3dd;
+  --error: #a8321f;
+  --warn: #8a6a1f;
+  --radius: 3px;
+
+  color-scheme: light;
+  font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+  font-size: 14px;
+  color: var(--ink);
+}
+
+* {
+  box-sizing: border-box;
+}
+
+html,
+body,
+#root {
+  height: 100%;
+  margin: 0;
+}
+
+body {
+  background: var(--paper);
+}
+
+.app {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+}
+
+header {
+  display: flex;
+  align-items: baseline;
+  gap: 14px;
+  padding: 10px 16px;
+  border-bottom: 1px solid var(--rule);
+  background: var(--paper-2);
+}
+
+header h1 {
+  margin: 0;
+  font-size: 16px;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+}
+
+header p {
+  margin: 0;
+  color: var(--ink-soft);
+  font-size: 12px;
+}
+
+main {
+  flex: 1;
+  display: grid;
+  grid-template-columns: 190px 1fr 380px;
+  min-height: 0;
+}
+
+/* ---------- paneles ---------- */
+
+.panel {
+  overflow: auto;
+  padding: 12px;
+  background: var(--paper-2);
+}
+
+.palette {
+  border-right: 1px solid var(--rule);
+}
+
+.result {
+  border-left: 1px solid var(--rule);
+}
+
+h2 {
+  margin: 14px 0 6px;
+  font-size: 11px;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--ink-soft);
+}
+
+h2:first-child {
+  margin-top: 0;
+}
+
+h3 {
+  margin: 16px 0 6px;
+  font-size: 12px;
+  letter-spacing: 0.04em;
+  color: var(--ink-soft);
+}
+
+.stack {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.stack.row {
+  flex-direction: row;
+  flex-wrap: wrap;
+  margin-top: 6px;
+}
+
+button {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  padding: 6px 8px;
+  font: inherit;
+  font-size: 13px;
+  color: var(--ink);
+  background: var(--paper);
+  border: 1px solid var(--rule-strong);
+  border-radius: var(--radius);
+  cursor: pointer;
+}
+
+button:hover {
+  background: #fff;
+  border-color: var(--ink-soft);
+}
+
+button.danger:hover {
+  color: var(--error);
+  border-color: var(--error);
+}
+
+kbd {
+  padding: 0 4px;
+  font-family: ui-monospace, 'Cascadia Mono', monospace;
+  font-size: 10px;
+  color: var(--ink-soft);
+  background: var(--paper-2);
+  border: 1px solid var(--rule);
+  border-radius: 2px;
+}
+
+.hint {
+  margin: 8px 0;
+  color: var(--ink-soft);
+  font-size: 12px;
+  line-height: 1.45;
+}
+
+/* ---------- lienzo ---------- */
+
+.canvas {
+  min-width: 0;
+  background: var(--paper);
+}
+
+.react-flow__node {
+  font-size: 13px;
+}
+
+.react-flow__edge-path {
+  stroke: var(--ink);
+  stroke-width: 1.2;
+}
+
+.react-flow__edge.bad .react-flow__edge-path {
+  stroke: var(--error);
+  stroke-dasharray: 4 3;
+}
+
+.react-flow__edge.hot .react-flow__edge-path {
+  stroke: var(--accent);
+  stroke-width: 2.4;
+}
+
+.react-flow__handle {
+  width: 7px;
+  height: 7px;
+  background: var(--paper);
+  border: 1px solid var(--rule-strong);
+}
+
+.react-flow__handle:hover {
+  border-color: var(--accent);
+}
+
+/* Margen invisible de agarre: el punto sigue midiendo 7px, pero se coge desde
+   unos píxeles antes. Arrastrar una conexión deja de ser puntería. */
+.react-flow__handle::after {
+  content: '';
+  position: absolute;
+  inset: -6px;
+}
+
+/* Contraconectores del flujo de derecha a izquierda: comparten posición con los
+   visibles, así que se dejan sin pintar. Siguen aceptando el arrastre, y la
+   arista de realimentación entra por el lado correcto sin duplicar los puntos. */
+.react-flow__handle.mirror {
+  background: transparent;
+  border: none;
+}
+
+.n-block {
+  display: grid;
+  place-items: center;
+  min-width: 74px;
+  padding: 12px 14px;
+  background: var(--paper);
+  border: 1.4px solid var(--ink);
+  border-radius: var(--radius);
+}
+
+.n-block .gain {
+  font-family: 'Cambria', Georgia, serif;
+  font-size: 16px;
+  font-style: italic;
+}
+
+.n-terminal {
+  padding: 6px 10px;
+  font-family: 'Cambria', Georgia, serif;
+  font-style: italic;
+  background: transparent;
+  border: 1px dashed var(--rule-strong);
+  border-radius: var(--radius);
+}
+
+/* La caja es mayor que el punto a propósito: el punto es lo que se agarra para
+   mover la bifurcación y los conectores se quedan a los lados, fuera de él. */
+.n-pickoff {
+  position: relative;
+  display: grid;
+  place-items: center;
+  width: 24px;
+  height: 24px;
+  background: transparent;
+}
+
+.n-pickoff .dot {
+  width: 11px;
+  height: 11px;
+  background: var(--ink);
+  border-radius: 50%;
+}
+
+/* Los conectores de la bifurcación se pintan solo al acercarse: siempre visibles
+   serían tres puntos donde el diagrama solo tiene uno. */
+.n-pickoff .react-flow__handle:not(.mirror) {
+  width: 8px;
+  height: 8px;
+  background: var(--paper);
+  border: 1px solid var(--rule-strong);
+  opacity: 0;
+  transition: opacity 0.12s ease;
+}
+
+.n-pickoff:hover .react-flow__handle:not(.mirror),
+.n-pickoff.sel .react-flow__handle:not(.mirror) {
+  opacity: 1;
+}
+
+/* Sin el margen extra de agarre: aquí volvería a tapar el punto. */
+.n-pickoff .react-flow__handle::after {
+  inset: -2px;
+}
+
+.n-sum {
+  position: relative;
+  display: grid;
+  place-items: center;
+  width: 34px;
+  height: 34px;
+  background: var(--paper);
+  border: 1.4px solid var(--ink);
+  border-radius: 50%;
+}
+
+.n-sum .cross {
+  font-size: 17px;
+  line-height: 1;
+}
+
+.n-sum .port-sign {
+  position: absolute;
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--ink-soft);
+  transform: translate(-50%, -50%);
+  pointer-events: none;
+}
+
+.react-flow__handle.port-minus {
+  border-color: var(--accent);
+}
+
+/* estados */
+
+.n-block.sel,
+.n-sum.sel,
+.n-terminal.sel {
+  outline: 2px solid var(--rule-strong);
+  outline-offset: 2px;
+}
+
+.n-pickoff.sel .dot {
+  outline: 2px solid var(--rule-strong);
+  outline-offset: 2px;
+}
+
+.n-block.bad,
+.n-sum.bad,
+.n-terminal.bad {
+  border-color: var(--error);
+}
+
+.n-pickoff.bad .dot {
+  background: var(--error);
+}
+
+.n-block.hot,
+.n-sum.hot,
+.n-terminal.hot {
+  border-color: var(--accent);
+  background: var(--accent-soft);
+}
+
+.n-pickoff.hot .dot {
+  background: var(--accent);
+  box-shadow: 0 0 0 4px var(--accent-soft);
+}
+
+/* ---------- resultado ---------- */
+
+.tabs {
+  display: flex;
+  gap: 4px;
+  margin-bottom: 10px;
+}
+
+.tabs button {
+  flex: 1;
+  justify-content: center;
+}
+
+.tabs button.on,
+.inspector button.on {
+  color: var(--paper);
+  background: var(--ink);
+  border-color: var(--ink);
+}
+
+.transfer {
+  padding: 10px 6px;
+  overflow-x: auto;
+  background: var(--paper);
+  border: 1px solid var(--rule);
+  border-radius: var(--radius);
+}
+
+.counters {
+  display: flex;
+  gap: 14px;
+  margin: 10px 0;
+  font-size: 12px;
+  color: var(--ink-soft);
+}
+
+.counters b {
+  color: var(--ink);
+}
+
+.copy {
+  width: 100%;
+  justify-content: center;
+}
+
+/* ---------- construcción de Δ ---------- */
+
+.delta-builder {
+  margin-top: 6px;
+  border-top: 1px solid var(--rule);
+}
+
+.walks {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.walks li {
+  display: flex;
+  justify-content: space-between;
+  gap: 10px;
+  padding: 3px 6px;
+  border-bottom: 1px dotted var(--rule);
+  cursor: default;
+}
+
+.walks li:hover {
+  background: var(--accent-soft);
+}
+
+.dk {
+  color: var(--ink-soft);
+  font-size: 12px;
+  white-space: nowrap;
+}
+
+.delta-line {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: 2px 4px;
+  padding: 8px 6px;
+  line-height: 2.1;
+}
+
+.term-wrap {
+  display: inline-flex;
+  align-items: baseline;
+  gap: 3px;
+}
+
+.term {
+  padding: 1px 4px;
+  background: var(--paper);
+  border: 1px solid var(--rule);
+  border-radius: var(--radius);
+  cursor: default;
+}
+
+.term:hover {
+  color: var(--accent);
+  background: var(--accent-soft);
+  border-color: var(--accent);
+}
+
+.term.static {
+  border-style: dotted;
+}
+
+.term-label {
+  font-size: 10px;
+  color: var(--ink-soft);
+  transform: translateY(-2px);
+}
+
+/* ---------- inspector ---------- */
+
+.field {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  margin-bottom: 10px;
+  font-size: 12px;
+  color: var(--ink-soft);
+}
+
+.field input {
+  padding: 6px 8px;
+  font: inherit;
+  font-size: 14px;
+  color: var(--ink);
+  background: var(--paper);
+  border: 1px solid var(--rule-strong);
+  border-radius: var(--radius);
+}
+
+.field input:focus {
+  outline: 2px solid var(--accent-soft);
+  border-color: var(--accent);
+}
+
+.ports {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.port-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 12px;
+  color: var(--ink-soft);
+}
+
+.port-row .sign {
+  width: 26px;
+  justify-content: center;
+  font-weight: 700;
+}
+
+.port-row .x {
+  margin-left: auto;
+  padding: 2px 6px;
+}
+
+.chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px;
+}
+
+.chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 2px 4px 2px 7px;
+  font-family: 'Cambria', Georgia, serif;
+  font-style: italic;
+  background: var(--paper);
+  border: 1px solid var(--rule-strong);
+  border-radius: 10px;
+}
+
+.chip button {
+  padding: 0 3px;
+  font-size: 11px;
+  border: none;
+  background: none;
+}
+
+.issues {
+  margin: 0;
+  padding-left: 16px;
+  font-size: 12px;
+  line-height: 1.5;
+}
+
+.issues.error,
+li.error {
+  color: var(--error);
+}
+
+.issues.warning,
+li.warning {
+  color: var(--warn);
+}
+
+p.issues {
+  padding-left: 0;
+  list-style: none;
+}

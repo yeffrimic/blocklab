@@ -1,0 +1,109 @@
+{
+  "version": 1,
+  "nodes": [
+    {
+      "id": "R",
+      "kind": "source",
+      "label": "R",
+      "pos": {
+        "x": 0,
+        "y": 120
+      }
+    },
+    {
+      "id": "p",
+      "kind": "pickoff",
+      "pos": {
+        "x": 120,
+        "y": 120
+      }
+    },
+    {
+      "id": "b1",
+      "kind": "block",
+      "gain": "G1",
+      "pos": {
+        "x": 240,
+        "y": 60
+      }
+    },
+    {
+      "id": "b2",
+      "kind": "block",
+      "gain": "G2",
+      "pos": {
+        "x": 240,
+        "y": 180
+      }
+    },
+    {
+      "id": "s",
+      "kind": "sum",
+      "ports": [
+        {
+          "id": "p1",
+          "sign": 1
+        },
+        {
+          "id": "p2",
+          "sign": 1
+        }
+      ],
+      "pos": {
+        "x": 400,
+        "y": 120
+      }
+    },
+    {
+      "id": "C",
+      "kind": "sink",
+      "label": "C",
+      "pos": {
+        "x": 520,
+        "y": 120
+      }
+    }
+  ],
+  "edges": [
+    {
+      "id": "R->p",
+      "from": "R",
+      "to": "p"
+    },
+    {
+      "id": "p->b1",
+      "from": "p",
+      "to": "b1"
+    },
+    {
+      "id": "p->b2",
+      "from": "p",
+      "to": "b2"
+    },
+    {
+      "id": "b1->s:p1",
+      "from": "b1",
+      "to": "s",
+      "toPort": "p1"
+    },
+    {
+      "id": "b2->s:p2",
+      "from": "b2",
+      "to": "s",
+      "toPort": "p2"
+    },
+    {
+      "id": "s->C",
+      "from": "s",
+      "to": "C"
+    }
+  ],
+  "symbols": [
+    {
+      "name": "G1"
+    },
+    {
+      "name": "G2"
+    }
+  ]
+}
