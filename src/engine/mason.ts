@@ -2,6 +2,7 @@ import type { Polynomial } from './polynomial/polynomial.ts';
 import {
   add,
   equals,
+  isZeroPoly,
   mulAll,
   negate,
   one,
@@ -100,8 +101,22 @@ export function mason(sfg: Sfg): MasonResult {
 
   if (!paths.length) warnings.push('No hay ningún camino directo de la entrada a la salida.');
 
+  if (isZeroPoly(delta.value)) {
+    warnings.push(
+      'Δ = 0: la ganancia de lazo vale exactamente 1, así que el denominador se anula y el ' +
+        'sistema no tiene función de transferencia. Suele ser un signo de sumador al revés.',
+    );
+  }
+
   return { numerator, denominator: delta.value, paths, pathDeltas, loops, delta, warnings };
 }
+
+/**
+ * Δ = 0. No es un resultado, es un sistema sin función de transferencia: pasa
+ * cuando la ganancia de lazo vale justo 1. Enseñar `algo / 0` como si fuera la
+ * respuesta sería peor que no enseñar nada.
+ */
+export const isSingular = (r: MasonResult): boolean => isZeroPoly(r.denominator);
 
 /** Sin lazos, Δ = 1: dividir entre 1 solo estorba. */
 const trivialDenominator = (r: MasonResult): boolean => equals(r.denominator, one());

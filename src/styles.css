@@ -56,6 +56,11 @@ header h1 {
   text-transform: uppercase;
 }
 
+header h1 a {
+  color: inherit;
+  text-decoration: none;
+}
+
 header p {
   margin: 0;
   color: var(--ink-soft);
@@ -552,4 +557,174 @@ li.warning {
 p.issues {
   padding-left: 0;
   list-style: none;
+}
+
+/* ---------- reducción paso a paso ---------- */
+
+.reduction {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  min-height: 0;
+}
+
+.reduction-stage {
+  padding: 6px 4px 2px;
+  background: var(--paper-2);
+  border: 1px solid var(--rule);
+  border-radius: var(--radius);
+}
+
+.graph-view {
+  display: block;
+  width: 100%;
+  height: auto;
+}
+
+.graph-view .gv-edge path {
+  fill: none;
+  stroke: var(--ink);
+  stroke-width: 1.3;
+}
+
+/* Las ramas de vuelta van por debajo y en rojo: es la realimentación. */
+.graph-view .gv-edge.back path,
+.graph-view .gv-edge.loop path {
+  stroke: var(--accent);
+}
+
+.graph-view .gv-edge text {
+  font-size: 8.5px;
+  font-family: 'Cambria', Georgia, serif;
+  font-style: italic;
+  fill: var(--ink-soft);
+}
+
+.graph-view .gv-edge.back text,
+.graph-view .gv-edge.loop text {
+  fill: var(--accent);
+}
+
+.graph-view .gv-node circle {
+  fill: var(--ink);
+}
+
+.graph-view .gv-node.end circle {
+  fill: var(--paper);
+  stroke: var(--ink);
+  stroke-width: 1.6;
+}
+
+.graph-view .gv-node text {
+  font-size: 8.5px;
+  fill: var(--ink-soft);
+}
+
+.reduction-controls {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.reduction-controls .play {
+  min-width: 104px;
+  justify-content: center;
+}
+
+.reduction-controls .counter {
+  margin-left: auto;
+  font-size: 12px;
+  color: var(--ink-soft);
+  font-variant-numeric: tabular-nums;
+}
+
+.reduction-steps {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  overflow-y: auto;
+}
+
+.reduction-steps > li > button {
+  display: grid;
+  grid-template-columns: 62px 1fr;
+  gap: 10px;
+  width: 100%;
+  padding: 9px 10px;
+  text-align: left;
+  background: transparent;
+  border: 1px solid transparent;
+  border-radius: var(--radius);
+  cursor: pointer;
+}
+
+.reduction-steps > li > button:hover {
+  background: var(--paper-2);
+}
+
+.reduction-steps > li.on > button {
+  background: var(--accent-soft);
+  border-color: var(--accent);
+}
+
+.reduction-steps .tag {
+  font-size: 10px;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--ink-soft);
+  padding-top: 2px;
+}
+
+.reduction-steps > li.on .tag {
+  color: var(--accent);
+}
+
+.reduction-steps .what {
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+  min-width: 0;
+}
+
+.reduction-steps .what b {
+  font-weight: 600;
+}
+
+.reduction-steps .why {
+  font-size: 12px;
+  line-height: 1.45;
+  color: var(--ink-soft);
+}
+
+.reduction-steps .gain {
+  margin-top: 4px;
+  overflow-x: auto;
+}
+
+/* La ganancia del lazo va en rojo, como la realimentación del lienzo. */
+.reduction-steps .gain.loop {
+  color: var(--accent);
+}
+
+.reduction-result {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  padding: 12px;
+  border-top: 1px solid var(--rule);
+}
+
+.reduction-result .tag {
+  font-size: 10px;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--ink-soft);
+}
+
+.reduction-result .math-display {
+  overflow-x: auto;
+  overflow-y: hidden;
 }

@@ -40,6 +40,11 @@ export const subR = (a: Rational, b: Rational): Rational => rat(a.n * b.d - b.n 
 export const mulR = (a: Rational, b: Rational): Rational => rat(a.n * b.n, a.d * b.d);
 export const negR = (a: Rational): Rational => ({ n: -a.n, d: a.d });
 
+export function divR(a: Rational, b: Rational): Rational {
+  if (b.n === 0n) throw new Error('Rational: división entre cero');
+  return rat(a.n * b.d, a.d * b.n);
+}
+
 export function ratToString(a: Rational): string {
   return a.d === 1n ? a.n.toString() : `${a.n}/${a.d}`;
 }

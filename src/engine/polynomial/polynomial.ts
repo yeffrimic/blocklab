@@ -1,5 +1,5 @@
 import type { Rational } from './rational.ts';
-import { ONE, addR, eq, isZero, negR, ratToString } from './rational.ts';
+import { ONE, addR, divR, eq, isZero, negR, ratToString } from './rational.ts';
 import type { Monomial } from './monomial.ts';
 import { mono, monoKey, mulMono } from './monomial.ts';
 
@@ -123,6 +123,90 @@ function render(p: Polynomial, latex: boolean): string {
 
 export const toString = (p: Polynomial): string => render(p, false);
 export const toLatex = (p: Polynomial): string => render(p, true);
+
+// --- División exacta --------------------------------------------------------
+// Mason no divide, pero la reducción paso a paso sí: cerrar un lazo es dividir,
+// y sin cancelar el factor común el resultado crece hasta ser ilegible aunque
+// sea correcto. Esto no es un MCD multivariado — solo comprueba si un candidato
+// divide exacto, que es lo único que hace falta para cancelar lo que sobra.
+
+/**
+ * Orden monomial graduado lexicográfico.
+ *
+ * El de `terms` no sirve aquí: desempata con `localeCompare` sobre la clave, que
+ * ordena bien para leer pero no es compatible con el producto. La división larga
+ * necesita que de `m1 < m2` se siga `m1·m ≤ m2·m`, o el término líder deja de
+ * bajar y el algoritmo se cuelga o falla. Grlex sí lo cumple.
+ */
+function cmpMono(a: Monomial, b: Monomial): number {
+  const da = degree(a);
+  const db = degree(b);
+  if (da !== db) return da - db;
+  const names = [...new Set([...a.vars.keys(), ...b.vars.keys()])].sort();
+  for (const n of names) {
+    const ea = a.vars.get(n) ?? 0;
+    const eb = b.vars.get(n) ?? 0;
+    if (ea !== eb) return ea - eb;
+  }
+  return 0;
+}
+
+/** Término líder en grlex. */
+function leading(p: Polynomial): Monomial | null {
+  let best: Monomial | null = null;
+  for (const m of p.values()) if (!best || cmpMono(m, best) > 0) best = m;
+  return best;
+}
+
+/**
+ * `a / b` cuando la división es exacta; `null` si sobra resto. División larga
+ * multivariada: se cancela el término líder una y otra vez, y como ese líder
+ * baja estrictamente en el orden, termina siempre.
+ */
+export function divideExact(a: Polynomial, b: Polynomial): Polynomial | null {
+  const lb = leading(b);
+  if (!lb) return null;
+  if (isZeroPoly(a)) return zero();
+
+  let r = a;
+  let q = zero();
+  let guard = 0;
+
+  while (!isZeroPoly(r)) {
+    if (++guard > 4000) return null;
+    const lr = leading(r)!;
+
+    const vars = new Map(lr.vars);
+    let divisible = true;
+    for (const [name, e] of lb.vars) {
+      const have = vars.get(name) ?? 0;
+      if (have < e) {
+        divisible = false;
+        break;
+      }
+      if (have - e === 0) vars.delete(name);
+      else vars.set(name, have - e);
+    }
+    if (!divisible) return null;
+
+    const t = fromMonomial(mono(divR(lr.coeff, lb.coeff), vars));
+    q = add(q, t);
+    r = sub(r, mul(t, b));
+  }
+
+  return q;
+}
+
+/**
+ * Si el polinomio empieza por un menos tal como se imprime. Se mira el primer
+ * término en el orden de presentación — el constante, cuando lo hay —, no el
+ * líder de grlex: en `1 - G1` el líder es `-G1` y normalizar por él dejaría
+ * `-1 + G1`, que es justo lo que se quiere evitar.
+ */
+export const rendersNegative = (p: Polynomial): boolean => {
+  const ts = terms(p);
+  return ts.length > 0 && ts[0]!.coeff.n < 0n;
+};
 
 // --- Forma factorizada ------------------------------------------------------
 // Sacar factor común es lo que hace cualquier libro de control al escribir el

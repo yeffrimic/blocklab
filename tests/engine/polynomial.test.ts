@@ -111,3 +111,28 @@ describe('forma factorizada', () => {
     }
   });
 });
+
+describe('división exacta', () => {
+  const div = (a: string, b: string) => {
+    const q = P.divideExact(parseGain(a), parseGain(b));
+    return q === null ? null : P.toString(q);
+  };
+
+  it('divide cuando la división es exacta', () => {
+    expect(div('G1*G2 + G1*G3', 'G1')).toBe('G2 + G3');
+    expect(div('G1^2 - G2^2', 'G1 - G2')).toBe('G1 + G2');
+  });
+
+  it('devuelve null cuando sobra resto', () => {
+    expect(div('G1 + G2', 'G3')).toBeNull();
+    expect(div('1 + G1', 'G1')).toBeNull();
+  });
+
+  // El orden de presentación de `terms` no es compatible con el producto; usarlo
+  // como orden monomial hacía fallar divisiones que sí son exactas.
+  it('usa un orden monomial válido, no el de presentación', () => {
+    const a = '(1 + G1*G2 + G1*G3) * (G4 + G5*G2 + G5*G3)';
+    expect(div(a, '1 + G1*G2 + G1*G3')).toBe(P.toString(parseGain('G4 + G5*G2 + G5*G3')));
+    expect(div(a, 'G4 + G5*G2 + G5*G3')).toBe(P.toString(parseGain('1 + G1*G2 + G1*G3')));
+  });
+});

@@ -1,13 +1,14 @@
 import { useState } from 'react';
 import type { Solution } from '../../engine/index.ts';
-import { resultToLatex, resultToString } from '../../engine/mason.ts';
+import { isSingular, resultToLatex, resultToString } from '../../engine/mason.ts';
 import { Math } from '../Math.tsx';
 import { DeltaBuilder } from '../DeltaBuilder/DeltaBuilder.tsx';
 import { Inspector } from '../Inspector.tsx';
+import { ReductionPanel } from '../Reduction/ReductionPanel.tsx';
 
 export function ResultPanel({ solution }: { solution: Solution }) {
-  const [tab, setTab] = useState<'resultado' | 'elemento'>('resultado');
-  const { result, error, issues } = solution;
+  const [tab, setTab] = useState<'resultado' | 'pasos' | 'elemento'>('resultado');
+  const { result, error, issues, reduction } = solution;
   const errorCount = issues.filter((i) => i.level === 'error').length;
 
   return (
@@ -16,6 +17,14 @@ export function ResultPanel({ solution }: { solution: Solution }) {
         <button className={tab === 'resultado' ? 'on' : ''} onClick={() => setTab('resultado')}>
           Resultado
         </button>
+        <button
+          className={tab === 'pasos' ? 'on' : ''}
+          onClick={() => setTab('pasos')}
+          disabled={!reduction}
+          title={reduction ? 'La reducción paso a paso' : 'Sin diagrama válido que reducir'}
+        >
+          Pasos
+        </button>
         <button className={tab === 'elemento' ? 'on' : ''} onClick={() => setTab('elemento')}>
           Elemento{errorCount ? ` (${errorCount})` : ''}
         </button>
@@ -23,6 +32,12 @@ export function ResultPanel({ solution }: { solution: Solution }) {
 
       {tab === 'elemento' ? (
         <Inspector issues={issues} />
+      ) : tab === 'pasos' ? (
+        reduction ? (
+          <ReductionPanel reduction={reduction} />
+        ) : (
+          <p className="hint">Corrige los errores del diagrama para ver la reducción.</p>
+        )
       ) : (
         <div className="result-body">
           {error && <p className="issues error">{error}</p>}
@@ -37,9 +52,15 @@ export function ResultPanel({ solution }: { solution: Solution }) {
 
           {result && (
             <>
-              <div className="transfer">
-                <Math display tex={`\\frac{C(s)}{R(s)} = ${resultToLatex(result)}`} />
-              </div>
+              {isSingular(result) ? (
+                // Δ = 0: enseñar `algo / 0` como si fuera la respuesta sería peor que no
+                // enseñar nada. El aviso de `mason` explica el porqué justo debajo.
+                <p className="issues error">Este sistema no tiene función de transferencia.</p>
+              ) : (
+                <div className="transfer">
+                  <Math display tex={`\\frac{C(s)}{R(s)} = ${resultToLatex(result)}`} />
+                </div>
+              )}
 
               <div className="counters">
                 <span>
