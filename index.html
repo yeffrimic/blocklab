@@ -1,12 +1,443 @@
 <!doctype html>
 <html lang="es">
-  <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>BlockLab — Diagramas de bloques</title>
-  </head>
-  <body>
-    <div id="root"></div>
-    <script type="module" src="/src/main.tsx"></script>
-  </body>
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>BlockLab · Diagramas de bloques</title>
+<meta name="description" content="BlockLab: dibuja un diagrama de bloques de control y obtén C(s)/R(s) exacta por la fórmula de Mason, con Δ explicado término a término y la reducción paso a paso. Gratis, sin cuenta." />
+<meta property="og:title" content="BlockLab · Diagramas de bloques" />
+<meta property="og:description" content="Resuelve diagramas de bloques y mira cómo se llega al resultado. Hecho por Yeffri J. Salazar." />
+<script>
+  // Los enlaces compartidos antiguos apuntaban a la raíz: se reenvían al editor.
+  if (location.hash.startsWith('#d=')) location.replace('app/' + location.hash);
+</script>
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet" />
+<style>
+  /* Misma paleta que yeffrimic.github.io: verde de PCB y cobre. */
+  :root {
+    --bg: #f6f5f1;
+    --surface: #ffffff;
+    --ink: #16201b;
+    --muted: #5b665f;
+    --line: #dfe3dc;
+    --accent: #0f7a4f;
+    --accent-soft: #e2f1e9;
+    --copper: #b8661f;
+    --copper-soft: #f7ebdf;
+    --shadow: 0 1px 2px rgba(20,30,25,.06), 0 4px 16px rgba(20,30,25,.05);
+  }
+  @media (prefers-color-scheme: dark) {
+    :root:not([data-theme="light"]) {
+      --bg: #0f1412; --surface: #161d1a; --ink: #e7ece8; --muted: #9aa6a0;
+      --line: #26302b; --accent: #4fc890; --accent-soft: #173127;
+      --copper: #e39a57; --copper-soft: #3a2a1b; --shadow: none;
+    }
+  }
+  :root[data-theme="dark"] {
+    --bg: #0f1412; --surface: #161d1a; --ink: #e7ece8; --muted: #9aa6a0;
+    --line: #26302b; --accent: #4fc890; --accent-soft: #173127;
+    --copper: #e39a57; --copper-soft: #3a2a1b; --shadow: none;
+  }
+  * { box-sizing: border-box; }
+  html { scroll-behavior: smooth; }
+  body {
+    margin: 0; overflow-wrap: anywhere; background: var(--bg); color: var(--ink);
+    font: 16px/1.6 "Inter", system-ui, sans-serif;
+  }
+  a { color: var(--accent); }
+  .wrap { max-width: 1080px; margin: 0 auto; padding: 0 16px; }
+  .mono { font-family: "JetBrains Mono", ui-monospace, monospace; }
+
+  nav.top {
+    position: sticky; top: 0; z-index: 10;
+    background: color-mix(in srgb, var(--bg) 88%, transparent);
+    backdrop-filter: blur(8px); border-bottom: 1px solid var(--line);
+  }
+  nav.top .wrap { display: flex; align-items: center; gap: 16px; height: 56px; }
+  nav.top .brand {
+    font-weight: 700; color: var(--ink); text-decoration: none; margin-right: auto;
+    display: inline-flex; align-items: center; gap: 8px; letter-spacing: .02em;
+  }
+  nav.top .brand svg { flex: none; }
+  nav.top .links { min-width: 0; display: flex; gap: 18px; overflow-x: auto; scrollbar-width: none; }
+  nav.top .links a { color: var(--muted); text-decoration: none; font-size: 14px; white-space: nowrap; }
+  nav.top .links a:hover { color: var(--ink); }
+  #themeToggle {
+    border: 1px solid var(--line); background: var(--surface); color: var(--ink);
+    border-radius: 8px; width: 34px; height: 34px; cursor: pointer; flex: none;
+  }
+  @media (max-width: 720px) { nav.top .links { display: none; } }
+
+  .chip-link {
+    display: inline-flex; align-items: center; gap: 6px; padding: 7px 14px;
+    border: 1px solid var(--line); border-radius: 999px; background: var(--surface);
+    color: var(--ink); text-decoration: none; font-size: 14px;
+  }
+  .chip-link:hover { border-color: var(--accent); }
+  .chip-link.primary { background: var(--accent); color: var(--bg); border-color: var(--accent); font-weight: 600; }
+  .chip-link.big { padding: 11px 22px; font-size: 16px; }
+  .row { display: flex; flex-wrap: wrap; gap: 10px; }
+
+  /* Hero */
+  header.hero { padding: 64px 0 48px; }
+  .hero-grid { display: grid; grid-template-columns: 1.05fr 1fr; gap: 40px; align-items: center; }
+  .kicker { font-size: 12px; color: var(--copper); text-transform: uppercase; letter-spacing: .12em; font-family: "JetBrains Mono", monospace; }
+  .hero h1 { font-size: clamp(32px, 5.4vw, 52px); line-height: 1.08; margin: 10px 0 16px; letter-spacing: -0.02em; }
+  .hero h1 em { font-style: normal; color: var(--accent); }
+  .hero p.lead { font-size: 18px; color: var(--muted); max-width: 560px; margin: 0 0 26px; }
+  .hero .fine { margin-top: 14px; font-size: 13px; color: var(--muted); }
+  @media (max-width: 860px) { .hero-grid { grid-template-columns: 1fr; } header.hero { padding-top: 40px; } }
+
+  /* Diagrama del hero */
+  .demo {
+    background: var(--surface); border: 1px solid var(--line); border-radius: 16px;
+    box-shadow: var(--shadow); overflow: hidden;
+  }
+  .demo-bar {
+    display: flex; gap: 6px; align-items: center; padding: 10px 14px;
+    border-bottom: 1px solid var(--line); font-size: 12px; color: var(--muted);
+  }
+  .demo-bar i { width: 9px; height: 9px; border-radius: 50%; background: var(--line); display: inline-block; }
+  .demo-bar span { margin-left: 8px; }
+  .demo svg { display: block; width: 100%; height: auto; }
+  .demo svg .trace { stroke: var(--accent); stroke-width: 2; fill: none; }
+  .demo svg .box { fill: var(--surface); stroke: var(--ink); stroke-width: 1.5; }
+  .demo svg .lbl { fill: var(--ink); font: 600 17px "JetBrains Mono", monospace; }
+  .demo svg .io { fill: var(--muted); font: 15px "JetBrains Mono", monospace; }
+  .demo svg .sign { fill: var(--copper); font: 700 16px "JetBrains Mono", monospace; }
+  .demo svg .pad { fill: var(--copper); }
+  .demo svg .head { fill: var(--accent); }
+  .demo svg .pulse { fill: var(--copper); }
+  @media (prefers-reduced-motion: reduce) { .demo svg .pulse { display: none; } }
+  .demo-result {
+    border-top: 1px dashed var(--line); padding: 14px 18px 16px; display: flex;
+    flex-wrap: wrap; align-items: center; gap: 10px 18px;
+  }
+  .frac { display: inline-flex; flex-direction: column; align-items: center; vertical-align: middle; line-height: 1.25; }
+  .frac > span:first-child { border-bottom: 1.5px solid currentColor; padding: 0 4px 2px; }
+  .frac > span:last-child { padding: 2px 4px 0; }
+  .tf { font-family: "JetBrains Mono", monospace; font-size: 17px; display: inline-flex; align-items: center; gap: 8px; }
+  .delta { font-family: "JetBrains Mono", monospace; font-size: 13px; color: var(--muted); }
+  .delta b { color: var(--copper); font-weight: 600; }
+
+  /* Secciones */
+  section.block { padding: 56px 0; border-top: 1px solid var(--line); scroll-margin-top: 56px; }
+  .sec-head { margin-bottom: 28px; max-width: 720px; }
+  .sec-head h2 { margin: 6px 0 8px; font-size: 30px; letter-spacing: -0.01em; line-height: 1.2; }
+  .sec-head p { margin: 0; color: var(--muted); font-size: 17px; }
+
+  .grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(min(240px, 100%), 1fr)); gap: 16px; }
+  .card {
+    background: var(--surface); border: 1px solid var(--line); border-radius: 14px;
+    padding: 20px; display: flex; flex-direction: column; gap: 8px; box-shadow: var(--shadow);
+  }
+  .card .ico {
+    width: 36px; height: 36px; border-radius: 10px; background: var(--accent-soft); color: var(--accent);
+    display: grid; place-items: center; font: 600 16px "JetBrains Mono", monospace;
+  }
+  .card h3 { margin: 4px 0 0; font-size: 17px; line-height: 1.3; }
+  .card p { margin: 0; color: var(--muted); font-size: 15px; }
+
+  /* Pasos */
+  .steps { list-style: none; margin: 0; padding: 0; display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px; counter-reset: step; }
+  .steps li { position: relative; padding: 18px 18px 18px 60px; border: 1px solid var(--line); border-radius: 14px; background: var(--surface); }
+  .steps li::before {
+    counter-increment: step; content: counter(step); position: absolute; left: 18px; top: 18px;
+    width: 28px; height: 28px; border-radius: 50%; border: 2px solid var(--accent); color: var(--accent);
+    display: grid; place-items: center; font: 600 13px "JetBrains Mono", monospace;
+  }
+  .steps b { display: block; margin-bottom: 2px; }
+  .steps span { color: var(--muted); font-size: 15px; }
+  @media (max-width: 860px) { .steps { grid-template-columns: 1fr; } }
+
+  /* Por qué */
+  .why { display: grid; grid-template-columns: 1.3fr 1fr; gap: 32px; align-items: start; }
+  .why .prose p { margin: 0 0 14px; font-size: 17px; }
+  .why .prose p.muted { color: var(--muted); }
+  .quote {
+    border-left: 3px solid var(--copper); background: var(--copper-soft); border-radius: 0 12px 12px 0;
+    padding: 18px 20px; font-size: 17px;
+  }
+  .quote small { display: block; margin-top: 8px; color: var(--muted); font-size: 14px; }
+  .principles { margin: 18px 0 0; padding: 0; list-style: none; display: grid; gap: 10px; }
+  .principles li { display: flex; gap: 10px; font-size: 15px; color: var(--muted); }
+  .principles li::before { content: "▸"; color: var(--accent); flex: none; }
+  .principles li b { color: var(--ink); font-weight: 600; }
+  @media (max-width: 860px) { .why { grid-template-columns: 1fr; } }
+
+  /* Autor */
+  .author {
+    display: grid; grid-template-columns: auto 1fr; gap: 28px; align-items: center;
+    background: var(--surface); border: 1px solid var(--line); border-radius: 18px; padding: 28px; box-shadow: var(--shadow);
+  }
+  .author img {
+    width: 140px; height: 140px; object-fit: cover; border-radius: 50%;
+    border: 4px solid var(--surface); box-shadow: var(--shadow), 0 0 0 2px var(--accent);
+  }
+  .author h3 { margin: 0; font-size: 24px; }
+  .author .role { color: var(--accent); font-weight: 600; margin: 2px 0 10px; }
+  .author p { margin: 0 0 16px; color: var(--muted); }
+  .stats { display: grid; grid-template-columns: repeat(4, 1fr); gap: 12px; margin-top: 16px; }
+  .stat { background: var(--surface); border: 1px solid var(--line); border-radius: 12px; padding: 14px 16px; }
+  .stat b { display: block; font-size: 24px; line-height: 1.1; }
+  .stat span { font-size: 13px; color: var(--muted); }
+  @media (max-width: 720px) {
+    .author { grid-template-columns: 1fr; padding: 22px; }
+    .author img { width: 110px; height: 110px; }
+    .stats { grid-template-columns: repeat(2, 1fr); }
+  }
+
+  .cta { text-align: center; padding: 64px 0; border-top: 1px solid var(--line); }
+  .cta h2 { font-size: 30px; margin: 0 0 10px; letter-spacing: -0.01em; }
+  .cta p { color: var(--muted); margin: 0 0 24px; }
+  .cta .row { justify-content: center; }
+
+  footer { padding: 28px 0 48px; border-top: 1px solid var(--line); color: var(--muted); font-size: 14px; }
+  footer .wrap { display: flex; flex-wrap: wrap; gap: 12px; justify-content: space-between; }
+</style>
+</head>
+<body>
+
+<nav class="top">
+  <div class="wrap">
+    <a class="brand" href="#inicio">
+      <svg width="22" height="22" viewBox="0 0 22 22" aria-hidden="true">
+        <rect x="6" y="6" width="10" height="10" rx="2" fill="none" stroke="var(--accent)" stroke-width="2" />
+        <path d="M1 11h5M16 11h5" stroke="var(--copper)" stroke-width="2" />
+      </svg>
+      BlockLab
+    </a>
+    <div class="links">
+      <a href="#que-hace">Qué hace</a>
+      <a href="#como">Cómo se usa</a>
+      <a href="#por-que">Por qué</a>
+      <a href="#autor">Autor</a>
+    </div>
+    <a class="chip-link primary" href="app/">Abrir el editor →</a>
+    <button id="themeToggle" aria-label="Cambiar tema claro u oscuro" title="Cambiar tema">◐</button>
+  </div>
+</nav>
+
+<header class="hero" id="inicio">
+  <div class="wrap hero-grid">
+    <div>
+      <span class="kicker">Sistemas de control · Fórmula de Mason</span>
+      <h1>Resuelve diagramas de bloques y <em>entiende</em> cómo se llega al resultado.</h1>
+      <p class="lead">
+        Dibuja el diagrama, obtén <span class="mono">C(s)/R(s)</span> exacta y simbólica, y mira
+        cómo se construye Δ término por término. Cada paso de la reducción dice qué regla aplica
+        y por qué se puede aplicar.
+      </p>
+      <div class="row">
+        <a class="chip-link primary big" href="app/">Abrir el editor →</a>
+        <a class="chip-link big" href="#que-hace">Ver qué hace</a>
+      </div>
+      <p class="fine">Gratis · sin cuenta · corre entero en tu navegador</p>
+    </div>
+
+    <figure class="demo" style="margin:0">
+      <div class="demo-bar"><i></i><i></i><i></i><span class="mono">lazo cerrado.json</span></div>
+      <svg viewBox="0 0 560 210" role="img" aria-label="Diagrama de lazo cerrado: R(s) entra a un sumador, pasa por G(s) hacia C(s), y H(s) realimenta la salida con signo negativo.">
+        <defs>
+          <marker id="arr" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="8" markerHeight="8" orient="auto-start-reverse">
+            <path class="head" d="M0 0 L10 5 L0 10 z" />
+          </marker>
+        </defs>
+        <text class="io" x="14" y="75">R(s)</text>
+        <path class="trace" d="M58 70 H97" marker-end="url(#arr)" />
+        <circle class="box" cx="115" cy="70" r="17" />
+        <path d="M103 58 L127 82 M127 58 L103 82" stroke="var(--line)" stroke-width="1.5" />
+        <text class="sign" x="86" y="58">+</text>
+        <text class="sign" x="122" y="112">−</text>
+        <path class="trace" d="M132 70 H198" marker-end="url(#arr)" />
+        <rect class="box" x="200" y="42" width="112" height="56" rx="6" />
+        <text class="lbl" x="256" y="76" text-anchor="middle">G(s)</text>
+        <path class="trace" d="M312 70 H468" marker-end="url(#arr)" />
+        <circle class="pad" cx="400" cy="70" r="5" />
+        <text class="io" x="478" y="75">C(s)</text>
+        <path class="trace" d="M400 70 V165 H314" marker-end="url(#arr)" />
+        <rect class="box" x="200" y="137" width="112" height="56" rx="6" />
+        <text class="lbl" x="256" y="171" text-anchor="middle">H(s)</text>
+        <path class="trace" d="M200 165 H115 V89" marker-end="url(#arr)" />
+        <circle class="pulse" r="4">
+          <animateMotion dur="3.2s" repeatCount="indefinite"
+            path="M58 70 H400 V165 H115 V70" />
+        </circle>
+      </svg>
+      <figcaption class="demo-result">
+        <span class="tf">
+          <span class="frac"><span>C(s)</span><span>R(s)</span></span>
+          =
+          <span class="frac"><span>G(s)</span><span>1 + G(s)H(s)</span></span>
+        </span>
+        <span class="delta">Δ = 1 − L₁ &nbsp;·&nbsp; <b>L₁ = −G(s)H(s)</b></span>
+      </figcaption>
+    </figure>
+  </div>
+</header>
+
+<section class="block" id="que-hace">
+  <div class="wrap">
+    <div class="sec-head">
+      <span class="kicker">Qué hace</span>
+      <h2>No solo la respuesta: el camino completo.</h2>
+      <p>Las herramientas que resuelven diagramas suelen dar el resultado final. BlockLab enseña de dónde sale.</p>
+    </div>
+    <div class="grid">
+      <article class="card">
+        <div class="ico">▭</div>
+        <h3>Editor de diagramas</h3>
+        <p>Bloques, sumadores con signo por puerto, bifurcaciones, entradas y salidas. Plantillas con los casos de libro.</p>
+      </article>
+      <article class="card">
+        <div class="ico">Σ</div>
+        <h3>Fórmula de Mason exacta</h3>
+        <p>Caminos directos, lazos y conjuntos no adyacentes, con aritmética racional exacta: lo que debe cancelarse da cero, no <span class="mono">1e-17</span>.</p>
+      </article>
+      <article class="card">
+        <div class="ico">Δ</div>
+        <h3>Δ término por término</h3>
+        <p>Pasa el cursor sobre un término de Δ y el lienzo resalta el lazo que lo originó.</p>
+      </article>
+      <article class="card">
+        <div class="ico">⇢</div>
+        <h3>Reducción paso a paso</h3>
+        <p>Cascada, paralelo, lazo cerrado: cada paso dice qué regla aplica y por qué. Funciona también con lazos entrelazados.</p>
+      </article>
+      <article class="card">
+        <div class="ico">!</div>
+        <h3>Errores con nombre</h3>
+        <p>Puertos sueltos, salidas inalcanzables, símbolos sin declarar: los avisos dicen qué está mal y dónde.</p>
+      </article>
+      <article class="card">
+        <div class="ico">⤴</div>
+        <h3>Comparte con un enlace</h3>
+        <p>El diagrama viaja dentro de la URL. Sin servidor, sin cuenta; también exporta a JSON y copia el resultado en LaTeX.</p>
+      </article>
+    </div>
+  </div>
+</section>
+
+<section class="block" id="como">
+  <div class="wrap">
+    <div class="sec-head">
+      <span class="kicker">Cómo se usa</span>
+      <h2>Tres pasos, sin instalar nada.</h2>
+    </div>
+    <ol class="steps">
+      <li><b>Dibuja</b><span>Inserta elementos desde la paleta o con las teclas <span class="mono">B S N E C</span>, y conéctalos arrastrando.</span></li>
+      <li><b>Escribe las ganancias</b><span>Símbolos como <span class="mono">G1</span>, <span class="mono">H2</span> o expresiones como <span class="mono">K*(G1+G2)</span>.</span></li>
+      <li><b>Lee y recorre</b><span>La función de transferencia aparece al instante; la pestaña <i>Pasos</i> reproduce la reducción.</span></li>
+    </ol>
+  </div>
+</section>
+
+<section class="block" id="por-que">
+  <div class="wrap why">
+    <div>
+      <div class="sec-head" style="margin-bottom:18px">
+        <span class="kicker">Por qué la hice</span>
+        <h2>Porque la respuesta sin el camino no enseña.</h2>
+      </div>
+      <div class="prose">
+        <p>
+          Reducir un diagrama de bloques es de esos temas en los que un signo mal puesto arruina
+          toda la página, y casi nunca queda claro en qué paso se perdió. Las calculadoras dan la
+          función de transferencia final, pero no explican de dónde sale cada término.
+        </p>
+        <p>
+          BlockLab nace de lo mismo que el resto de mi trabajo: que aprender tecnología no dependa
+          de tener acceso a software caro, a una licencia o a una buena conexión. Por eso es gratis,
+          no pide cuenta y corre entero en el navegador.
+        </p>
+        <p class="muted">
+          Está pensado para estudiantes que quieren verificar su procedimiento, y para docentes que
+          necesitan mostrar en clase cómo se construye Δ sin llenar el pizarrón.
+        </p>
+      </div>
+    </div>
+    <div>
+      <div class="quote">
+        «Me dedico a que la tecnología llegue a quien más la necesita.»
+        <small>— Yeffri J. Salazar</small>
+      </div>
+      <ul class="principles">
+        <li><span><b>Mason es la fuente de verdad.</b> La narración de pasos se contrasta con él y se calla si no cuadra.</span></li>
+        <li><span><b>Los textos son parte del producto.</b> «El segundo sumador», no <span class="mono">s3f9a</span>.</span></li>
+        <li><span><b>El signo vive en el sumador</b>, que es donde suelen nacer los errores.</span></li>
+      </ul>
+    </div>
+  </div>
+</section>
+
+<section class="block" id="autor">
+  <div class="wrap">
+    <div class="sec-head">
+      <span class="kicker">Quién la hizo</span>
+      <h2>Hola, soy Yeffri.</h2>
+    </div>
+    <div class="author">
+      <img src="https://yeffrimic.github.io/images/yo.jpg" alt="Foto de Yeffri J. Salazar" width="140" height="140" loading="lazy" />
+      <div>
+        <h3>Yeffri J. Salazar</h3>
+        <p class="role">CTO · Ingeniero en electrónica · Robótica, IoT y educación tecnológica</p>
+        <p>
+          Llevo más de 10 años construyendo productos de hardware de punta a punta, del esquemático
+          de la PCB al firmware y el producto desplegado. Lidero la comunidad Arduino Guatemala desde
+          2017, soy cofundador de Xibalba Hackerspace y dirijo el programa La Ruta del Chip.
+          Desde Sacatepéquez, Guatemala.
+        </p>
+        <div class="row">
+          <a class="chip-link primary" href="https://yeffrimic.github.io/">Mi portafolio</a>
+          <a class="chip-link" href="https://github.com/yeffrimic">GitHub</a>
+          <a class="chip-link" href="https://www.linkedin.com/in/yeffrimic/">LinkedIn</a>
+          <a class="chip-link" href="mailto:yeffri@protonmail.com">✉ Escríbeme</a>
+        </div>
+      </div>
+    </div>
+    <div class="stats">
+      <div class="stat"><b>20 000+</b><span>estudiantes alcanzados</span></div>
+      <div class="stat"><b>4</b><span>países de Centroamérica</span></div>
+      <div class="stat"><b>10+</b><span>años en hardware y comunidad</span></div>
+      <div class="stat"><b>3×</b><span>menciones en Forbes</span></div>
+    </div>
+  </div>
+</section>
+
+<section class="cta">
+  <div class="wrap">
+    <h2>Prueba con tu próximo ejercicio.</h2>
+    <p>Carga una plantilla o dibuja el tuyo; el resultado aparece mientras editas.</p>
+    <div class="row">
+      <a class="chip-link primary big" href="app/">Abrir el editor →</a>
+    </div>
+  </div>
+</section>
+
+<footer>
+  <div class="wrap">
+    <span>BlockLab · hecho en Guatemala por <a href="https://yeffrimic.github.io/">Yeffri J. Salazar</a></span>
+    <span class="mono">sin backend · sin cuenta</span>
+  </div>
+</footer>
+
+<script>
+  (function () {
+    var root = document.documentElement;
+    try {
+      var saved = localStorage.getItem('theme');
+      if (saved === 'light' || saved === 'dark') root.dataset.theme = saved;
+    } catch (e) {}
+    document.getElementById('themeToggle').addEventListener('click', function () {
+      var dark = root.dataset.theme
+        ? root.dataset.theme === 'dark'
+        : matchMedia('(prefers-color-scheme: dark)').matches;
+      root.dataset.theme = dark ? 'light' : 'dark';
+      try { localStorage.setItem('theme', root.dataset.theme); } catch (e) {}
+    });
+  })();
+</script>
+</body>
 </html>

@@ -27,7 +27,7 @@ export default function App() {
   return (
     <div className="app">
       <header>
-        <h1>BlockLab</h1>
+        <h1><a href="../" title="Volver al inicio">BlockLab</a></h1>
         <p>Editor y solucionador de diagramas de bloques — fórmula de Mason</p>
       </header>
       <main>
