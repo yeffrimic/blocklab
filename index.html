@@ -65,7 +65,7 @@
   nav.top .links { min-width: 0; display: flex; gap: 18px; overflow-x: auto; scrollbar-width: none; }
   nav.top .links a { color: var(--muted); text-decoration: none; font-size: 14px; white-space: nowrap; }
   nav.top .links a:hover { color: var(--ink); }
-  #themeToggle {
+  #themeToggle, #motionToggle {
     border: 1px solid var(--line); background: var(--surface); color: var(--ink);
     border-radius: 8px; width: 34px; height: 34px; cursor: pointer; flex: none;
   }
@@ -73,7 +73,7 @@
   nav.top.on-dark { background: rgba(6, 16, 11, .55); border-color: rgba(255,255,255,.08); }
   nav.top.on-dark .brand, nav.top.on-dark .links a:hover { color: #e7ece8; }
   nav.top.on-dark .links a { color: #9fb2a8; }
-  nav.top.on-dark #themeToggle { background: rgba(255,255,255,.06); border-color: rgba(255,255,255,.12); color: #e7ece8; }
+  nav.top.on-dark :is(#themeToggle, #motionToggle) { background: rgba(255,255,255,.06); border-color: rgba(255,255,255,.12); color: #e7ece8; }
   @media (max-width: 720px) { nav.top .links { display: none; } }
 
   .chip-link {
@@ -332,11 +332,14 @@
   footer { padding: 28px 0 48px; border-top: 1px solid var(--line); color: var(--muted); font-size: 14px; }
   footer .wrap { display: flex; flex-wrap: wrap; gap: 12px; justify-content: space-between; }
 
-  /* Sin movimiento: la intro se salta y las señales se quedan quietas. */
+  /* Con «reducir movimiento» lo que se mueve solo se queda quieto; lo que mueve el
+     usuario (el zoom con el scroll, el brazo con el slider) sigue funcionando. El
+     botón ▶ Animar de la barra lo vuelve a encender todo. */
+  #motionToggle { width: auto; padding: 0 10px; font-size: 13px; }
   @media (prefers-reduced-motion: reduce) {
-    html { scroll-behavior: auto; }
-    .dive { display: none; }
-    .psig, .sig, .bsig { animation: none; opacity: 0; }
+    html:not([data-motion="full"]) { scroll-behavior: auto; }
+    html:not([data-motion="full"]) :is(.psig, .sig, .bsig) { animation: none; opacity: 0; }
+    html:not([data-motion="full"]) :is(.e, .hole, .free, .gate, .hi, .lo, .dive-hint) { animation: none; }
   }
 </style>
 </head>
@@ -358,6 +361,7 @@
       <a href="#autor">Autor</a>
     </div>
     <a class="chip-link primary" href="app/">Abrir el editor →</a>
+    <button id="motionToggle" hidden aria-pressed="false" title="Tu sistema pide reducir el movimiento; pulsa para ver las animaciones">▶ Animar</button>
     <button id="themeToggle" aria-label="Cambiar tema claro u oscuro" title="Cambiar tema">◐</button>
   </div>
 </nav>
@@ -662,6 +666,27 @@
   });
 })();
 
+/* Animaciones: el sistema puede pedir menos movimiento, pero la persona manda. */
+var motionQuery = matchMedia('(prefers-reduced-motion: reduce)');
+function motionReduced() { return motionQuery.matches && document.documentElement.dataset.motion !== 'full'; }
+(function () {
+  var root = document.documentElement, btn = document.getElementById('motionToggle');
+  try { if (localStorage.getItem('motion') === 'full') root.dataset.motion = 'full'; } catch (e) {}
+  function paint() {
+    btn.hidden = !motionQuery.matches;
+    var full = root.dataset.motion === 'full';
+    btn.textContent = full ? '⏸ Pausar' : '▶ Animar';
+    btn.setAttribute('aria-pressed', String(full));
+  }
+  btn.addEventListener('click', function () {
+    if (root.dataset.motion === 'full') delete root.dataset.motion; else root.dataset.motion = 'full';
+    try { localStorage.setItem('motion', root.dataset.motion || ''); } catch (e) {}
+    paint();
+  });
+  motionQuery.addEventListener('change', paint);
+  paint();
+})();
+
 /* Aleatorio con semilla: el chip sale igual en cada visita. */
 function rng(seed) {
   return function () {
@@ -697,7 +722,7 @@ var f1 = function (n) { return Math.round(n * 10) / 10; };
    al escalar ambos por 8^(t - i), el relevo coincide sin saltos. */
 (function () {
   var dive = document.getElementById('dive');
-  if (!dive || getComputedStyle(dive).display === 'none') return;
+  if (!dive) return;
   var layers = [].slice.call(dive.querySelectorAll('.layer'));
 
   /* Nivel 0: la placa y el encapsulado QFP. */
@@ -980,7 +1005,6 @@ var f1 = function (n) { return Math.round(n * 10) / 10; };
   var goal = document.getElementById('armGoal'), read = document.getElementById('armRead'), led = document.getElementById('armLed');
   var canvas = document.getElementById('scope'), ctx = canvas.getContext('2d');
   var tfNum = document.getElementById('tfNum'), tfK = document.getElementById('tfK');
-  var reduced = matchMedia('(prefers-reduced-motion: reduce)').matches;
 
   var K = +slider.value, th = 20 * D, w = 0, tau = 0, ref = 20 * D, time = 0, lastKick = 0, blown = 0;
   var hist = [], WINDOW = 8;
@@ -1001,6 +1025,8 @@ var f1 = function (n) { return Math.round(n * 10) / 10; };
     statusEl.innerHTML = describe();
   }
   slider.addEventListener('input', function () { setK(+slider.value); });
+  // Sin el cambio automático de objetivo, soltar el slider muestra el efecto de la nueva K.
+  slider.addEventListener('change', function () { if (motionReduced()) kick(); });
   function kick() { ref = ref < 45 * D ? 75 * D : 20 * D; lastKick = time; }
   document.getElementById('kick').addEventListener('click', kick);
   setK(K);
@@ -1061,13 +1087,13 @@ var f1 = function (n) { return Math.round(n * 10) / 10; };
     var dt = Math.min(0.05, (ts - prev) / 1000 || 0.016); prev = ts;
     var n = Math.ceil(dt / 0.002);
     for (var i = 0; i < n; i++) { step(dt / n); time += dt / n; }
-    if (time - lastKick > 4.5) kick();
+    // El objetivo cambia solo; con movimiento reducido, solo cuando lo pide la persona.
+    if (time - lastKick > 4.5 && !motionReduced()) kick();
     hist.push({ t: time, o: th / D, r: ref / D });
     while (hist.length && hist[0].t < time - WINDOW) hist.shift();
     draw();
     requestAnimationFrame(loop);
   }
-  if (reduced) { draw(); return; }
   new IntersectionObserver(function (entries) {
     var vis = entries[0].isIntersecting;
     if (vis && !running) { running = true; prev = performance.now(); requestAnimationFrame(loop); }
