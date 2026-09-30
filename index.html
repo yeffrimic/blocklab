@@ -54,6 +54,7 @@
     position: sticky; top: 0; z-index: 10;
     background: color-mix(in srgb, var(--bg) 88%, transparent);
     backdrop-filter: blur(8px); border-bottom: 1px solid var(--line);
+    transition: background .3s, border-color .3s;
   }
   nav.top .wrap { display: flex; align-items: center; gap: 16px; height: 56px; }
   nav.top .brand {
@@ -68,6 +69,11 @@
     border: 1px solid var(--line); background: var(--surface); color: var(--ink);
     border-radius: 8px; width: 34px; height: 34px; cursor: pointer; flex: none;
   }
+  /* Sobre la intro la barra va siempre en oscuro, sea cual sea el tema. */
+  nav.top.on-dark { background: rgba(6, 16, 11, .55); border-color: rgba(255,255,255,.08); }
+  nav.top.on-dark .brand, nav.top.on-dark .links a:hover { color: #e7ece8; }
+  nav.top.on-dark .links a { color: #9fb2a8; }
+  nav.top.on-dark #themeToggle { background: rgba(255,255,255,.06); border-color: rgba(255,255,255,.12); color: #e7ece8; }
   @media (max-width: 720px) { nav.top .links { display: none; } }
 
   .chip-link {
@@ -80,8 +86,99 @@
   .chip-link.big { padding: 11px 22px; font-size: 16px; }
   .row { display: flex; flex-wrap: wrap; gap: 10px; }
 
-  /* Hero */
-  header.hero { padding: 64px 0 48px; }
+  /* ───────────── Intro: zoom dentro del chip ───────────── */
+  .dive { position: relative; height: 560vh; margin-top: -57px; background: var(--bg); }
+  .dive-stage {
+    position: sticky; top: 0; height: 100vh; height: 100svh; overflow: hidden;
+    background: radial-gradient(120% 90% at 50% 45%, #0e2419 0%, #06110b 70%, #030805 100%);
+    color: #e7ece8;
+  }
+  .layer { position: absolute; inset: 0; width: 100%; height: 100%; display: block; }
+  .dive-caption {
+    position: absolute; left: max(16px, calc((100vw - 1080px) / 2 + 16px)); bottom: 32px;
+    max-width: 440px; margin-right: 16px; padding: 16px 18px; border-radius: 14px;
+    background: rgba(5, 14, 9, .72); border: 1px solid rgba(124, 240, 181, .18);
+    backdrop-filter: blur(6px); transition: opacity .35s, transform .35s;
+  }
+  .dive-caption.swap { opacity: 0; transform: translateY(6px); }
+  .dive-caption .k { font: 600 12px "JetBrains Mono", monospace; color: #e39a57; letter-spacing: .12em; text-transform: uppercase; }
+  .dive-caption h2 { margin: 4px 0 6px; font-size: clamp(22px, 3.2vw, 30px); line-height: 1.15; letter-spacing: -.01em; }
+  .dive-caption p { margin: 0; color: #a9bab1; font-size: 15px; }
+  .dive-rail {
+    position: absolute; right: max(16px, calc((100vw - 1080px) / 2 + 16px)); top: 50%; transform: translateY(-50%);
+    list-style: none; margin: 0; padding: 0; display: grid; gap: 14px;
+  }
+  .dive-rail li { display: flex; align-items: center; justify-content: flex-end; gap: 10px; font: 12px "JetBrains Mono", monospace; color: #6f8479; transition: color .3s; }
+  .dive-rail li::after { content: ""; width: 10px; height: 10px; border-radius: 50%; border: 2px solid currentColor; transition: background .3s; }
+  .dive-rail li.on { color: #7cf0b5; }
+  .dive-rail li.on::after { background: #7cf0b5; box-shadow: 0 0 10px #7cf0b5; }
+  .dive-hint {
+    position: absolute; left: 50%; top: 72px; transform: translateX(-50%);
+    font: 13px "JetBrains Mono", monospace; color: #cfe0d6; transition: opacity .4s;
+    padding: 6px 14px; border-radius: 999px; background: rgba(5,14,9,.7); border: 1px solid rgba(124,240,181,.25);
+    animation: bob 1.6s ease-in-out infinite; white-space: nowrap;
+  }
+  @keyframes bob { 50% { transform: translate(-50%, 5px); } }
+  .dive-skip {
+    position: absolute; right: max(16px, calc((100vw - 1080px) / 2 + 16px)); bottom: 32px;
+    font: 13px "JetBrains Mono", monospace; color: #9fb2a8; text-decoration: none;
+    padding: 6px 12px; border: 1px solid rgba(255,255,255,.14); border-radius: 999px; background: rgba(5,14,9,.5);
+  }
+  .dive-skip:hover { color: #e7ece8; border-color: #7cf0b5; }
+  @media (max-width: 720px) {
+    .dive-rail { display: none; }
+    .dive-caption { bottom: 64px; }
+    .dive-skip { bottom: 16px; }
+  }
+
+  /* Piezas de los niveles */
+  .dive svg text { font-family: "JetBrains Mono", monospace; }
+  .tr { fill: none; stroke: #b87333; stroke-width: 7; stroke-linecap: round; stroke-linejoin: round; opacity: .9; }
+  .sig { fill: none; stroke: #ffd08a; stroke-width: 5; stroke-linecap: round; stroke-dasharray: 5 95; animation: sig 3s linear infinite; }
+  .sig.rev { animation-direction: reverse; }
+  @keyframes sig { from { stroke-dashoffset: 100; } to { stroke-dashoffset: 0; } }
+  .via { fill: #b87333; } .via-h { fill: #06110b; }
+  .pin, .smd-pad { fill: #c3c8cc; }
+  .smd-body { fill: #8a6a48; } .smd-body.r { fill: #1d1f21; }
+  .silk { fill: #d5e4db; font-size: 16px; font-weight: 600; opacity: .7; }
+  .silk-l { fill: none; stroke: #d5e4db; stroke-width: 2.5; opacity: .55; }
+  .mark { fill: #7f8883; }
+  .die { fill: #1d2230; stroke: #454d5f; stroke-width: 3; }
+  .seal { fill: none; stroke: #5a6480; stroke-width: 4; }
+  .bpad { fill: #c9b27a; }
+  .wire { fill: none; stroke: #d9b155; stroke-width: 2.4; opacity: .9; }
+  .blk { stroke: #4a5470; stroke-width: 2; }
+  .blk-l { fill: #dfe7f2; font-size: 22px; font-weight: 600; }
+  .blk-s { fill: #8e9bb3; font-size: 13px; }
+  .bus { fill: none; stroke: #c98a45; stroke-width: 8; stroke-linecap: round; stroke-linejoin: round; }
+  .bsig { fill: none; stroke: #ffe3ae; stroke-width: 7; stroke-linecap: round; stroke-dasharray: 4 96; animation: sig 3.4s linear infinite; }
+  .cb { fill: #1b202b; stroke: #2c3345; stroke-width: 1; }
+  .pd { fill: #3a8f63; opacity: .85; } .nd { fill: #2f7f58; opacity: .7; }
+  .po { fill: #d0584a; }
+  .ct { fill: #0b0d12; stroke: #9aa7bd; stroke-width: .8; }
+  .m1 { fill: #4c74b8; opacity: .92; }
+  .m2 { stroke: #c98a45; stroke-width: 3; opacity: .75; }
+  .nw { fill: rgba(201,178,74,.07); stroke: #c9b24a; stroke-dasharray: 10 8; stroke-width: 3; }
+  .target { fill: none; stroke: #7cf0b5; stroke-width: 1.5; }
+  .lbl3 { fill: #e5ecf5; font-size: 22px; font-weight: 600; }
+  .lgd { fill: #aab5c6; font-size: 16px; }
+  .gate { animation: gate 4s infinite; }
+  @keyframes gate { 0%, 46% { fill: #ff7b66; } 54%, 100% { fill: #6e3530; } }
+  .hi { animation: hi 4s infinite; } .lo { animation: lo 4s infinite; }
+  @keyframes hi { 0%, 46% { opacity: 1; } 54%, 100% { opacity: 0; } }
+  @keyframes lo { 0%, 46% { opacity: 0; } 54%, 100% { opacity: 1; } }
+  .e { fill: #7cf0b5; animation: run linear infinite; }
+  .hole { fill: none; stroke: #ffb86b; stroke-width: 3; animation: run linear infinite; }
+  @keyframes run { from { transform: translateX(0); } to { transform: translateX(440px); } }
+  .atom { fill: #253045; stroke: #6f7fa0; stroke-width: 3; }
+  .si { fill: #cfd8e8; font-size: 17px; font-weight: 600; }
+  .bond { stroke: #3e4a66; stroke-width: 5; }
+  .pair { fill: #8fb4ff; }
+  .free { fill: #7cf0b5; animation: fly linear infinite; }
+  @keyframes fly { from { transform: translateX(0); } to { transform: translateX(1100px); } }
+
+  /* ───────────── Hero ───────────── */
+  header.hero { padding: 64px 0 48px; scroll-margin-top: 56px; }
   .hero-grid { display: grid; grid-template-columns: 1.05fr 1fr; gap: 40px; align-items: center; }
   .kicker { font-size: 12px; color: var(--copper); text-transform: uppercase; letter-spacing: .12em; font-family: "JetBrains Mono", monospace; }
   .hero h1 { font-size: clamp(32px, 5.4vw, 52px); line-height: 1.08; margin: 10px 0 16px; letter-spacing: -0.02em; }
@@ -90,10 +187,9 @@
   .hero .fine { margin-top: 14px; font-size: 13px; color: var(--muted); }
   @media (max-width: 860px) { .hero-grid { grid-template-columns: 1fr; } header.hero { padding-top: 40px; } }
 
-  /* Diagrama del hero */
   .demo {
     background: var(--surface); border: 1px solid var(--line); border-radius: 16px;
-    box-shadow: var(--shadow); overflow: hidden;
+    box-shadow: var(--shadow); overflow: hidden; margin: 0;
   }
   .demo-bar {
     display: flex; gap: 6px; align-items: center; padding: 10px 14px;
@@ -102,15 +198,18 @@
   .demo-bar i { width: 9px; height: 9px; border-radius: 50%; background: var(--line); display: inline-block; }
   .demo-bar span { margin-left: 8px; }
   .demo svg { display: block; width: 100%; height: auto; }
-  .demo svg .trace { stroke: var(--accent); stroke-width: 2; fill: none; }
-  .demo svg .box { fill: var(--surface); stroke: var(--ink); stroke-width: 1.5; }
-  .demo svg .lbl { fill: var(--ink); font: 600 17px "JetBrains Mono", monospace; }
-  .demo svg .io { fill: var(--muted); font: 15px "JetBrains Mono", monospace; }
-  .demo svg .sign { fill: var(--copper); font: 700 16px "JetBrains Mono", monospace; }
-  .demo svg .pad { fill: var(--copper); }
-  .demo svg .head { fill: var(--accent); }
-  .demo svg .pulse { fill: var(--copper); }
-  @media (prefers-reduced-motion: reduce) { .demo svg .pulse { display: none; } }
+  .demo svg text { font-family: "JetBrains Mono", monospace; }
+  .ptr { fill: none; stroke: var(--copper); stroke-width: 3.5; stroke-linecap: round; stroke-linejoin: round; }
+  .psig { fill: none; stroke: var(--accent); stroke-width: 5; stroke-linecap: round; stroke-dasharray: 5 95; animation: sig 2.6s linear infinite; }
+  .pchip { fill: #1c211e; stroke: #313833; stroke-width: 1.5; }
+  .ppin { fill: #b9bec2; }
+  .plbl { fill: #e7ece8; font-size: 17px; font-weight: 600; }
+  .psilk { fill: var(--muted); font-size: 11px; }
+  .pring { fill: var(--surface); stroke: var(--copper); stroke-width: 3; }
+  .pvia { fill: var(--surface); stroke: var(--copper); stroke-width: 3; }
+  .pio { fill: var(--muted); font-size: 15px; }
+  .psign { fill: var(--copper); font-size: 16px; font-weight: 700; }
+  .phead { fill: var(--copper); }
   .demo-result {
     border-top: 1px dashed var(--line); padding: 14px 18px 16px; display: flex;
     flex-wrap: wrap; align-items: center; gap: 10px 18px;
@@ -122,7 +221,7 @@
   .delta { font-family: "JetBrains Mono", monospace; font-size: 13px; color: var(--muted); }
   .delta b { color: var(--copper); font-weight: 600; }
 
-  /* Secciones */
+  /* ───────────── Secciones ───────────── */
   section.block { padding: 56px 0; border-top: 1px solid var(--line); scroll-margin-top: 56px; }
   .sec-head { margin-bottom: 28px; max-width: 720px; }
   .sec-head h2 { margin: 6px 0 8px; font-size: 30px; letter-spacing: -0.01em; line-height: 1.2; }
@@ -139,6 +238,42 @@
   }
   .card h3 { margin: 4px 0 0; font-size: 17px; line-height: 1.3; }
   .card p { margin: 0; color: var(--muted); font-size: 15px; }
+
+  /* Laboratorio: brazo + osciloscopio */
+  .lab { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+  .lab .card { padding: 16px; }
+  .lab-ctl { grid-column: 1 / -1; display: grid !important; grid-template-columns: 1.2fr 1fr; gap: 16px 28px; align-items: center; }
+  .lab h3 { margin: 0; font-size: 13px; font-family: "JetBrains Mono", monospace; color: var(--muted); font-weight: 600; letter-spacing: .06em; text-transform: uppercase; }
+  #arm, #scope { width: 100%; display: block; }
+  #scope { aspect-ratio: 4 / 3; border-radius: 10px; background: #07110c; }
+  .arm-link { fill: var(--ink); }
+  .arm-joint { fill: var(--surface); stroke: var(--ink); stroke-width: 3; }
+  .arm-bolt { fill: var(--surface); }
+  .arm-base { fill: var(--ink); }
+  .arm-servo { fill: var(--accent); }
+  .arm-ghost { stroke: var(--copper); stroke-width: 2; stroke-dasharray: 6 6; fill: none; }
+  .arm-goal { fill: var(--copper-soft); stroke: var(--copper); stroke-width: 2; }
+  .arm-arc { stroke: var(--line); stroke-width: 1.5; fill: none; stroke-dasharray: 3 6; }
+  .arm-txt { fill: var(--muted); font: 12px "JetBrains Mono", monospace; }
+  .arm-led { fill: #3b4a42; } .arm-led.on { fill: #7cf0b5; }
+  .k-row { display: flex; align-items: center; gap: 14px; }
+  .k-row label { font: 600 15px "JetBrains Mono", monospace; white-space: nowrap; }
+  .k-row output { font: 700 22px "JetBrains Mono", monospace; min-width: 3ch; text-align: right; color: var(--accent); }
+  input[type=range] { flex: 1; accent-color: var(--accent); min-width: 0; }
+  .status { margin: 10px 0 0; font-size: 15px; color: var(--muted); min-height: 2.6em; }
+  .status b { color: var(--ink); }
+  .status.bad b { color: #d0584a; }
+  .lab-tf { font-family: "JetBrains Mono", monospace; font-size: 15px; display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
+  .lab-tf .k { color: var(--accent); font-weight: 700; }
+  .lab-note { font-size: 13px; color: var(--muted); margin: 8px 0 0; }
+  .lab button {
+    font: inherit; font-size: 14px; padding: 7px 14px; border-radius: 999px; cursor: pointer;
+    border: 1px solid var(--line); background: var(--surface); color: var(--ink); margin-top: 12px;
+  }
+  .lab button:hover { border-color: var(--accent); }
+  .scope-legend { display: flex; gap: 14px; font: 12px "JetBrains Mono", monospace; color: var(--muted); }
+  .scope-legend i { display: inline-block; width: 16px; height: 3px; vertical-align: middle; margin-right: 6px; border-radius: 2px; }
+  @media (max-width: 860px) { .lab, .lab-ctl { grid-template-columns: 1fr !important; } }
 
   /* Pasos */
   .steps { list-style: none; margin: 0; padding: 0; display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px; counter-reset: step; }
@@ -196,11 +331,18 @@
 
   footer { padding: 28px 0 48px; border-top: 1px solid var(--line); color: var(--muted); font-size: 14px; }
   footer .wrap { display: flex; flex-wrap: wrap; gap: 12px; justify-content: space-between; }
+
+  /* Sin movimiento: la intro se salta y las señales se quedan quietas. */
+  @media (prefers-reduced-motion: reduce) {
+    html { scroll-behavior: auto; }
+    .dive { display: none; }
+    .psig, .sig, .bsig { animation: none; opacity: 0; }
+  }
 </style>
 </head>
 <body>
 
-<nav class="top">
+<nav class="top" id="nav">
   <div class="wrap">
     <a class="brand" href="#inicio">
       <svg width="22" height="22" viewBox="0 0 22 22" aria-hidden="true">
@@ -211,7 +353,7 @@
     </a>
     <div class="links">
       <a href="#que-hace">Qué hace</a>
-      <a href="#como">Cómo se usa</a>
+      <a href="#en-vivo">En vivo</a>
       <a href="#por-que">Por qué</a>
       <a href="#autor">Autor</a>
     </div>
@@ -219,6 +361,26 @@
     <button id="themeToggle" aria-label="Cambiar tema claro u oscuro" title="Cambiar tema">◐</button>
   </div>
 </nav>
+
+<!-- Intro: al bajar se entra en el chip, nivel por nivel, hasta el silicio. -->
+<section class="dive" id="dive" aria-label="Animación: un viaje con zoom desde un chip hasta sus transistores y el silicio">
+  <div class="dive-stage">
+    <svg class="layer" viewBox="0 0 1000 1000" preserveAspectRatio="xMidYMid slice" aria-hidden="true"><g></g></svg>
+    <svg class="layer" viewBox="0 0 1000 1000" preserveAspectRatio="xMidYMid slice" aria-hidden="true"><g></g></svg>
+    <svg class="layer" viewBox="0 0 1000 1000" preserveAspectRatio="xMidYMid slice" aria-hidden="true"><g></g></svg>
+    <svg class="layer" viewBox="0 0 1000 1000" preserveAspectRatio="xMidYMid slice" aria-hidden="true"><g></g></svg>
+    <svg class="layer" viewBox="0 0 1000 1000" preserveAspectRatio="xMidYMid slice" aria-hidden="true"><g></g></svg>
+
+    <div class="dive-hint" id="diveHint">Desliza para entrar ↓</div>
+    <ol class="dive-rail" id="diveRail">
+      <li>Chip</li><li>Die</li><li>Celdas</li><li>Transistor</li><li>Silicio</li>
+    </ol>
+    <div class="dive-caption" id="diveCaption" aria-live="polite">
+      <div class="k"></div><h2></h2><p></p>
+    </div>
+    <a class="dive-skip" href="#inicio">Saltar intro ↓</a>
+  </div>
+</section>
 
 <header class="hero" id="inicio">
   <div class="wrap hero-grid">
@@ -232,39 +394,38 @@
       </p>
       <div class="row">
         <a class="chip-link primary big" href="app/">Abrir el editor →</a>
-        <a class="chip-link big" href="#que-hace">Ver qué hace</a>
+        <a class="chip-link big" href="#en-vivo">Probar un lazo en vivo</a>
       </div>
       <p class="fine">Gratis · sin cuenta · corre entero en tu navegador</p>
     </div>
 
-    <figure class="demo" style="margin:0">
-      <div class="demo-bar"><i></i><i></i><i></i><span class="mono">lazo cerrado.json</span></div>
-      <svg viewBox="0 0 560 210" role="img" aria-label="Diagrama de lazo cerrado: R(s) entra a un sumador, pasa por G(s) hacia C(s), y H(s) realimenta la salida con signo negativo.">
+    <figure class="demo">
+      <div class="demo-bar"><i></i><i></i><i></i><span class="mono">lazo-cerrado.kicad_pcb</span></div>
+      <svg viewBox="0 0 560 222" role="img" aria-label="Diagrama de lazo cerrado dibujado como una placa: R(s) entra a un sumador, pasa por el chip G(s) hacia C(s), y el chip H(s) realimenta la salida con signo negativo.">
         <defs>
-          <marker id="arr" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="8" markerHeight="8" orient="auto-start-reverse">
-            <path class="head" d="M0 0 L10 5 L0 10 z" />
+          <marker id="parr" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+            <path class="phead" d="M0 0 L10 5 L0 10 z" />
           </marker>
         </defs>
-        <text class="io" x="14" y="75">R(s)</text>
-        <path class="trace" d="M58 70 H97" marker-end="url(#arr)" />
-        <circle class="box" cx="115" cy="70" r="17" />
-        <path d="M103 58 L127 82 M127 58 L103 82" stroke="var(--line)" stroke-width="1.5" />
-        <text class="sign" x="86" y="58">+</text>
-        <text class="sign" x="122" y="112">−</text>
-        <path class="trace" d="M132 70 H198" marker-end="url(#arr)" />
-        <rect class="box" x="200" y="42" width="112" height="56" rx="6" />
-        <text class="lbl" x="256" y="76" text-anchor="middle">G(s)</text>
-        <path class="trace" d="M312 70 H468" marker-end="url(#arr)" />
-        <circle class="pad" cx="400" cy="70" r="5" />
-        <text class="io" x="478" y="75">C(s)</text>
-        <path class="trace" d="M400 70 V165 H314" marker-end="url(#arr)" />
-        <rect class="box" x="200" y="137" width="112" height="56" rx="6" />
-        <text class="lbl" x="256" y="171" text-anchor="middle">H(s)</text>
-        <path class="trace" d="M200 165 H115 V89" marker-end="url(#arr)" />
-        <circle class="pulse" r="4">
-          <animateMotion dur="3.2s" repeatCount="indefinite"
-            path="M58 70 H400 V165 H115 V70" />
-        </circle>
+        <text class="pio" x="10" y="56">R(s)</text>
+        <circle class="pvia" cx="26" cy="70" r="6" />
+        <path class="ptr" d="M32 70 H94" marker-end="url(#parr)" />
+        <circle class="pring" cx="115" cy="70" r="18" />
+        <circle class="pvia" cx="115" cy="70" r="5" />
+        <text class="psign" x="84" y="58">+</text>
+        <text class="psign" x="124" y="112">−</text>
+        <path class="ptr" d="M133 70 H194" marker-end="url(#parr)" />
+        <path class="ptr" d="M312 70 H464" marker-end="url(#parr)" />
+        <circle class="pvia" cx="400" cy="70" r="6" />
+        <circle class="pvia" cx="478" cy="70" r="6" />
+        <text class="pio" x="466" y="56">C(s)</text>
+        <path class="ptr" d="M400 76 V170 H318" marker-end="url(#parr)" />
+        <path class="ptr" d="M200 170 H115 V93" marker-end="url(#parr)" />
+        <path class="psig" pathLength="100" d="M32 70 H400 V170 H115 V88" />
+        <path class="psig" pathLength="100" style="animation-delay:-1.3s" d="M32 70 H400 V170 H115 V88" />
+        <path class="psig" pathLength="100" style="animation-duration:1.6s" d="M400 70 H472" />
+        <g id="chipG"></g>
+        <g id="chipH"></g>
       </svg>
       <figcaption class="demo-result">
         <span class="tf">
@@ -316,6 +477,67 @@
         <h3>Comparte con un enlace</h3>
         <p>El diagrama viaja dentro de la URL. Sin servidor, sin cuenta; también exporta a JSON y copia el resultado en LaTeX.</p>
       </article>
+    </div>
+  </div>
+</section>
+
+<section class="block" id="en-vivo">
+  <div class="wrap">
+    <div class="sec-head">
+      <span class="kicker">Control en vivo</span>
+      <h2>Súbele la ganancia y mira qué pasa.</h2>
+      <p>Un brazo con motor y sensor de ángulo, controlado por una ganancia K. Es una simulación real del lazo cerrado, no una animación grabada.</p>
+    </div>
+    <div class="lab">
+      <div class="card">
+        <h3>Brazo · articulación 1</h3>
+        <svg id="arm" viewBox="0 0 400 290" role="img" aria-label="Brazo robótico que gira hacia el ángulo objetivo">
+          <path class="arm-arc" d="M300 235 A170 170 0 0 0 130 65" />
+          <g id="armGoal">
+            <line class="arm-ghost" x1="130" y1="235" x2="300" y2="235" />
+            <circle class="arm-goal" cx="300" cy="235" r="11" />
+          </g>
+          <rect class="arm-base" x="70" y="262" width="120" height="14" rx="4" />
+          <rect class="arm-servo" x="98" y="212" width="64" height="52" rx="8" />
+          <text class="arm-txt" x="106" y="254" fill="#fff" style="fill:#06110b">M1</text>
+          <circle class="arm-led" id="armLed" cx="150" cy="248" r="4" />
+          <g id="armLink">
+            <rect class="arm-link" x="-16" y="-14" width="196" height="28" rx="14" />
+            <circle class="arm-bolt" cx="60" cy="0" r="4" />
+            <circle class="arm-bolt" cx="120" cy="0" r="4" />
+            <path class="arm-link" d="M170 -18 h18 l14 8 h-14 v20 h14 l-14 8 h-18 z" />
+          </g>
+          <circle class="arm-joint" cx="130" cy="235" r="15" />
+          <text class="arm-txt" x="226" y="30" id="armRead">θ = 0°  ·  objetivo 0°</text>
+        </svg>
+      </div>
+      <div class="card">
+        <h3>Osciloscopio · ángulo vs. tiempo</h3>
+        <canvas id="scope" width="400" height="300" role="img" aria-label="Gráfica de la respuesta del ángulo en el tiempo"></canvas>
+        <div class="scope-legend">
+          <span><i style="background:#7cf0b5"></i>θ(t) salida</span>
+          <span><i style="background:#e39a57"></i>r(t) objetivo</span>
+        </div>
+      </div>
+      <div class="card lab-ctl">
+        <div>
+          <div class="k-row">
+            <label for="gainK">Ganancia K</label>
+            <input type="range" id="gainK" min="1" max="70" step="1" value="10" />
+            <output id="gainOut" for="gainK">10</output>
+          </div>
+          <p class="status" id="status"></p>
+          <button id="kick" type="button">Cambiar objetivo</button>
+        </div>
+        <div>
+          <h3>Función de transferencia de este lazo</h3>
+          <p class="lab-tf">
+            <span class="frac"><span>C(s)</span><span>R(s)</span></span> =
+            <span class="frac"><span class="k" id="tfNum">10</span><span>0.1s³ + 1.4s² + 4s + <span class="k" id="tfK">10</span></span></span>
+          </p>
+          <p class="lab-note">Controlador K, motor con retardo 1/(0.1s+1) y brazo 1/(s(s+4)). Con K &gt; 56 el denominador tiene raíces con parte real positiva: el lazo se vuelve inestable.</p>
+        </div>
+      </div>
     </div>
   </div>
 </section>
@@ -424,20 +646,435 @@
 </footer>
 
 <script>
-  (function () {
-    var root = document.documentElement;
-    try {
-      var saved = localStorage.getItem('theme');
-      if (saved === 'light' || saved === 'dark') root.dataset.theme = saved;
-    } catch (e) {}
-    document.getElementById('themeToggle').addEventListener('click', function () {
-      var dark = root.dataset.theme
-        ? root.dataset.theme === 'dark'
-        : matchMedia('(prefers-color-scheme: dark)').matches;
-      root.dataset.theme = dark ? 'light' : 'dark';
-      try { localStorage.setItem('theme', root.dataset.theme); } catch (e) {}
+/* Tema claro/oscuro, igual que en el portafolio. */
+(function () {
+  var root = document.documentElement;
+  try {
+    var saved = localStorage.getItem('theme');
+    if (saved === 'light' || saved === 'dark') root.dataset.theme = saved;
+  } catch (e) {}
+  document.getElementById('themeToggle').addEventListener('click', function () {
+    var dark = root.dataset.theme
+      ? root.dataset.theme === 'dark'
+      : matchMedia('(prefers-color-scheme: dark)').matches;
+    root.dataset.theme = dark ? 'light' : 'dark';
+    try { localStorage.setItem('theme', root.dataset.theme); } catch (e) {}
+  });
+})();
+
+/* Aleatorio con semilla: el chip sale igual en cada visita. */
+function rng(seed) {
+  return function () {
+    seed = (seed + 0x6d2b79f5) | 0;
+    var t = Math.imul(seed ^ (seed >>> 15), 1 | seed);
+    t = (t + Math.imul(t ^ (t >>> 7), 61 | t)) ^ t;
+    return ((t ^ (t >>> 14)) >>> 0) / 4294967296;
+  };
+}
+var f1 = function (n) { return Math.round(n * 10) / 10; };
+
+/* Chips del diagrama del hero: encapsulado con patitas arriba y abajo. */
+(function () {
+  function chip(x, y, label, silk) {
+    var s = '<rect class="pchip" x="' + x + '" y="' + y + '" width="112" height="60" rx="5"/>';
+    for (var i = 0; i < 6; i++) {
+      var px = x + 11 + i * 18;
+      s += '<rect class="ppin" x="' + px + '" y="' + (y - 7) + '" width="8" height="7" rx="1"/>';
+      s += '<rect class="ppin" x="' + px + '" y="' + (y + 60) + '" width="8" height="7" rx="1"/>';
+    }
+    s += '<circle cx="' + (x + 10) + '" cy="' + (y + 10) + '" r="3" fill="#0b0d0c"/>';
+    s += '<text class="plbl" x="' + (x + 56) + '" y="' + (y + 36) + '" text-anchor="middle">' + label + '</text>';
+    s += '<text class="psilk" x="' + (x + 114) + '" y="' + (y - 10) + '" text-anchor="end">' + silk + '</text>';
+    return s;
+  }
+  document.getElementById('chipG').innerHTML = chip(200, 40, 'G(s)', 'U1');
+  document.getElementById('chipH').innerHTML = chip(200, 140, 'H(s)', 'U2');
+})();
+
+/* ───────────── Intro: cinco niveles, cada uno 8× más adentro ─────────────
+   Cada nivel se dibuja en 1000×1000 con su objetivo de zoom en el centro, y el
+   siguiente nivel ocupa exactamente el cuadrado central de 125 del anterior. Así,
+   al escalar ambos por 8^(t - i), el relevo coincide sin saltos. */
+(function () {
+  var dive = document.getElementById('dive');
+  if (!dive || getComputedStyle(dive).display === 'none') return;
+  var layers = [].slice.call(dive.querySelectorAll('.layer'));
+
+  /* Nivel 0: la placa y el encapsulado QFP. */
+  function levelChip() {
+    var R = rng(7), s = '';
+    s += '<defs><linearGradient id="chipGrad" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#25292c"/><stop offset="1" stop-color="#101214"/></linearGradient>' +
+         '<pattern id="pcbTex" width="24" height="24" patternUnits="userSpaceOnUse"><circle cx="12" cy="12" r="1" fill="#1b4a33"/></pattern></defs>';
+    s += '<rect width="1000" height="1000" fill="url(#pcbTex)"/>';
+    var n = 12, pitch = 24, start = 500 - (n - 1) * pitch / 2;
+    for (var k = 0; k < 4; k++) {
+      var side = '';
+      for (var i = 0; i < n; i++) {
+        var x = start + i * pitch, off = x - 500;
+        var y1 = 280 - R() * 40, x2 = 500 + off * 2.3, y2 = y1 - Math.abs(x2 - x);
+        var via = y2 > 140 && R() < 0.45;
+        var yEnd = via ? f1(y2 - 30 - R() * (y2 - 150)) : -40;
+        var d = 'M' + x + ' 300 V' + f1(y1) + ' L' + f1(x2) + ' ' + f1(y2) + ' V' + yEnd;
+        side += '<path class="tr" d="' + d + '"/>';
+        if (via) side += '<circle class="via" cx="' + f1(x2) + '" cy="' + yEnd + '" r="10"/><circle class="via-h" cx="' + f1(x2) + '" cy="' + yEnd + '" r="4"/>';
+        if (R() < 0.45) side += '<path class="sig' + (R() < 0.5 ? ' rev' : '') + '" pathLength="100" d="' + d + '" style="animation-duration:' + (2.2 + R() * 2.6).toFixed(2) + 's;animation-delay:-' + (R() * 4).toFixed(2) + 's"/>';
+        side += '<rect class="pin" x="' + (x - 5.5) + '" y="294" width="11" height="38" rx="2"/>';
+      }
+      s += '<g transform="rotate(' + k * 90 + ' 500 500)">' + side + '</g>';
+    }
+    function smd(x, y, rot, label, res) {
+      return '<g transform="translate(' + x + ' ' + y + ') rotate(' + rot + ')"><rect class="smd-pad" x="-24" y="-11" width="15" height="22" rx="2"/><rect class="smd-pad" x="9" y="-11" width="15" height="22" rx="2"/><rect class="smd-body' + (res ? ' r' : '') + '" x="-12" y="-9" width="24" height="18" rx="2"/></g>' +
+             '<text class="silk" x="' + x + '" y="' + (y + 36) + '" text-anchor="middle">' + label + '</text>';
+    }
+    s += smd(90, 90, 0, 'C1') + smd(160, 130, 90, 'C2') + smd(900, 95, 0, 'R4', 1) + smd(850, 150, 90, 'R5', 1) +
+         smd(95, 890, 90, 'C7') + smd(150, 860, 0, 'C8') + smd(890, 880, 0, 'D1', 1) + smd(850, 830, 90, 'R9', 1);
+    s += '<path class="silk-l" d="M316 346 V316 H346 M654 316 H684 V346 M684 654 V684 H654 M346 684 H316 V654"/>';
+    s += '<text class="silk" x="690" y="312">U1</text>';
+    s += '<g id="lid"><rect x="330" y="330" width="340" height="340" rx="10" fill="url(#chipGrad)" stroke="#34393c" stroke-width="2"/>';
+    s += '<circle cx="364" cy="364" r="9" fill="#0a0b0c"/>';
+    s += '<text class="mark" x="500" y="470" text-anchor="middle" font-size="46" font-weight="600">BL-01</text>';
+    s += '<text class="mark" x="500" y="510" text-anchor="middle" font-size="18" letter-spacing="6">BLOCKLAB</text>';
+    s += '<text class="mark" x="500" y="545" text-anchor="middle" font-size="14" opacity=".7">GT 2026 · Σ G H</text></g>';
+    return s;
+  }
+
+  /* Nivel 1: el die. Su plano es el diagrama de bloques del lazo. */
+  function levelDie() {
+    var s = '';
+    s += '<defs><pattern id="sram" width="12" height="12" patternUnits="userSpaceOnUse"><rect width="12" height="12" fill="#262d3d"/><rect x="2" y="2" width="8" height="8" fill="#39425a"/></pattern>' +
+         '<pattern id="rows" width="40" height="10" patternUnits="userSpaceOnUse"><rect width="40" height="10" fill="#1f2533"/><rect y="0" width="40" height="1.2" fill="#4c74b8" opacity=".7"/><rect x="6" y="2.5" width="1" height="5" fill="#d0584a"/><rect x="17" y="2.5" width="1" height="5" fill="#d0584a"/><rect x="29" y="2.5" width="1" height="5" fill="#d0584a"/><rect x="3" y="3" width="30" height="1.6" fill="#3a8f63" opacity=".7"/><rect x="3" y="6" width="30" height="1.6" fill="#2f7f58" opacity=".6"/></pattern>' +
+         '<marker id="barr" viewBox="0 0 10 10" refX="7" refY="5" markerWidth="4" markerHeight="4" orient="auto"><path d="M0 0 L10 5 L0 10 z" fill="#c98a45"/></marker></defs>';
+    // Hilos de oro: de cada pad del die a la patita que le toca en el nivel anterior.
+    var wires = '', pads = '';
+    for (var k = 0; k < 4; k++) {
+      var w = '', p = '';
+      for (var i = 0; i < 12; i++) {
+        var x = 170 + i * 60, tx = 500 + (368 + i * 24 - 500) * 8;
+        w += '<path class="wire" d="M' + x + ' 139 C' + x + ' 40 ' + tx + ' -600 ' + tx + ' -1020"/>';
+        p += '<rect class="bpad" x="' + (x - 11) + '" y="128" width="22" height="22" rx="2"/>';
+      }
+      wires += '<g transform="rotate(' + k * 90 + ' 500 500)">' + w + '</g>';
+      pads += '<g transform="rotate(' + k * 90 + ' 500 500)">' + p + '</g>';
+    }
+    s += wires;
+    s += '<rect class="die" x="110" y="110" width="780" height="780" rx="6"/>';
+    s += '<rect class="seal" x="160" y="160" width="680" height="680" rx="4"/>';
+    s += pads;
+    // Bloques
+    s += '<rect class="blk" x="185" y="185" width="150" height="130" fill="url(#sram)"/><text class="blk-s" x="192" y="305">SRAM</text>';
+    s += '<rect class="blk" x="665" y="185" width="150" height="130" fill="url(#sram)"/><text class="blk-s" x="672" y="305">SRAM</text>';
+    s += '<rect class="blk" x="380" y="185" width="240" height="120" fill="#232a3a"/><text class="blk-s" x="388" y="296">PLL</text>';
+    var sp = 'M500 245', r = 8;
+    for (var q = 0; q < 7; q++) { r += 7; sp += ' h' + (q % 2 ? -r : r) + ' v' + (q % 2 ? -r : r); }
+    s += '<path d="' + sp + '" fill="none" stroke="#c98a45" stroke-width="3"/>';
+    s += '<rect class="blk" x="690" y="360" width="125" height="100" fill="#26303a"/><text class="blk-l" x="752" y="418" text-anchor="middle" font-size="18">ADC</text>';
+    s += '<rect class="blk" x="690" y="540" width="125" height="100" fill="#26303a"/><text class="blk-l" x="752" y="598" text-anchor="middle" font-size="18">E/S</text>';
+    s += '<rect class="blk" x="185" y="430" width="110" height="140" fill="#26352f"/><text class="blk-l" x="240" y="512" text-anchor="middle" font-size="40">Σ</text>';
+    s += '<rect class="blk" x="400" y="700" width="200" height="110" fill="#2b2a3c"/><text class="blk-l" x="500" y="763" text-anchor="middle">H(s)</text>';
+    // Buses del lazo
+    var fwd = 'M150 500 H183', loop = 'M297 500 H373', out = 'M627 500 H850', fb = 'M660 500 V755 H604', back = 'M398 755 H240 V574';
+    s += '<path class="bus" d="' + fwd + '" marker-end="url(#barr)"/><path class="bus" d="' + loop + '" marker-end="url(#barr)"/>' +
+         '<path class="bus" d="' + out + '"/><path class="bus" d="' + fb + '" marker-end="url(#barr)"/><path class="bus" d="' + back + '" marker-end="url(#barr)"/>';
+    s += '<circle cx="660" cy="500" r="9" fill="#c98a45"/>';
+    s += '<path class="bsig" pathLength="100" d="M150 500 H660 V755 H240 V574"/><path class="bsig" pathLength="100" style="animation-delay:-1.7s" d="M150 500 H660 V755 H240 V574"/>';
+    s += '<text class="blk-l" x="150" y="485" font-size="18">R</text><text class="blk-l" x="836" y="485" font-size="18">C</text>';
+    s += '<text x="170" y="488" fill="#e39a57" font-size="20" font-weight="700">+</text><text x="250" y="600" fill="#e39a57" font-size="24" font-weight="700">−</text>';
+    // G(s): el bloque central, ya con filas de celdas, que es a donde se entra.
+    s += '<rect class="blk" x="375" y="375" width="250" height="250" fill="url(#rows)"/>';
+    s += '<rect x="380" y="380" width="74" height="30" rx="4" fill="#0e121b" opacity=".85"/><text class="blk-l" x="386" y="402" font-size="20">G(s)</text>';
+    return s;
+  }
+
+  /* Nivel 3 (se usa también, en pequeño, en el nivel 2): un inversor CMOS. */
+  function inverter(detail) {
+    var s = '';
+    s += '<rect x="40" y="120" width="920" height="55" class="m1"/>';
+    s += '<rect x="40" y="800" width="920" height="55" class="m1"/>';
+    s += '<rect x="150" y="195" width="700" height="190" class="nw"/>';
+    s += '<rect x="250" y="240" width="500" height="110" class="pd"/>';
+    s += '<rect x="250" y="440" width="500" height="120" class="nd"/>';
+    s += '<rect x="290" y="150" width="60" height="150" class="m1"/>';
+    s += '<rect x="290" y="485" width="60" height="330" class="m1"/>';
+    s += '<rect x="650" y="280" width="60" height="250" class="m1"/>';
+    s += '<rect x="650" y="378" width="250" height="44" class="m1"/>';
+    s += '<rect x="120" y="376" width="350" height="44" class="m1"/>';
+    s += '<rect x="475" y="205" width="50" height="385" class="po' + (detail ? ' gate' : '') + '"/>';
+    s += '<rect x="440" y="366" width="120" height="64" class="po' + (detail ? ' gate' : '') + '"/>';
+    [[305, 280], [665, 280], [305, 485], [665, 485], [485, 383]].forEach(function (c) {
+      s += '<rect class="ct" x="' + c[0] + '" y="' + c[1] + '" width="30" height="30"/>';
     });
-  })();
+    if (!detail) return s;
+    var R = rng(33), e = '', h = '';
+    for (var i = 0; i < 12; i++) {
+      var st = 'animation-duration:' + (1.4 + R() * 1.2).toFixed(2) + 's;animation-delay:-' + (R() * 2.5).toFixed(2) + 's';
+      e += '<circle class="e" cx="270" cy="' + f1(452 + R() * 96) + '" r="6" style="' + st + '"/>';
+      h += '<circle class="hole" cx="270" cy="' + f1(252 + R() * 86) + '" r="6" style="' + st + '"/>';
+    }
+    s += '<g class="hi">' + e + '</g><g class="lo">' + h + '</g>';
+    s += '<text class="lbl3" x="60" y="156">VDD</text><text class="lbl3" x="60" y="836">GND</text>';
+    s += '<text class="lbl3" x="768" y="300">PMOS</text><text class="lbl3" x="768" y="508">NMOS</text>';
+    s += '<text class="lbl3" x="160" y="222" font-size="16" fill="#c9b24a">pozo N</text>';
+    s += '<text class="lbl3 hi" x="130" y="460">A = 1</text><text class="lbl3 lo" x="130" y="460">A = 0</text>';
+    s += '<text class="lbl3 hi" x="740" y="462">Y = 0</text><text class="lbl3 lo" x="740" y="462">Y = 1</text>';
+    var lg = [['po', 'polisilicio · compuerta'], ['pd', 'difusión'], ['m1', 'metal 1'], ['ct', 'contacto']];
+    lg.forEach(function (l, i) {
+      var x = 150 + (i % 2) * 360, y = 890 + Math.floor(i / 2) * 36;
+      s += '<rect class="' + l[0] + '" x="' + x + '" y="' + (y - 16) + '" width="22" height="18"/><text class="lgd" x="' + (x + 32) + '" y="' + y + '">' + l[1] + '</text>';
+    });
+    return s;
+  }
+
+  /* Nivel 2: filas de celdas estándar entre rieles de VDD y GND. */
+  function levelCells() {
+    var R = rng(21), s = '<rect width="1000" height="1000" fill="#151923"/>';
+    function cell(x, y0, w, flip) {
+      var c = '<rect class="cb" x="' + f1(x + 1) + '" y="' + (y0 + 9) + '" width="' + f1(w - 2) + '" height="62"/>';
+      var pY = flip ? y0 + 46 : y0 + 16, nY = flip ? y0 + 16 : y0 + 46;
+      c += '<rect class="pd" x="' + f1(x + 5) + '" y="' + pY + '" width="' + f1(w - 10) + '" height="18"/>';
+      c += '<rect class="nd" x="' + f1(x + 5) + '" y="' + nY + '" width="' + f1(w - 10) + '" height="18"/>';
+      var g = Math.max(1, Math.floor(w / 22));
+      for (var j = 0; j < g; j++) {
+        var gx = x + w * (j + 1) / (g + 1);
+        c += '<rect class="po" x="' + f1(gx - 2) + '" y="' + (y0 + 11) + '" width="4" height="58"/>';
+        var cx = x + w * (j + 0.5) / (g + 1);
+        c += '<rect class="ct" x="' + f1(cx - 3) + '" y="' + (pY + 6) + '" width="6" height="6"/><rect class="ct" x="' + f1(cx - 3) + '" y="' + (nY + 6) + '" width="6" height="6"/>';
+      }
+      if (R() < 0.5) {
+        var mx = x + w * 0.5 / (g + 1);
+        c += '<rect class="m1" x="' + f1(mx - 3) + '" y="' + (y0 + 22) + '" width="6" height="36"/>';
+      }
+      return c;
+    }
+    function fill(x0, x1, y0, flip) {
+      var x = x0, c = '';
+      while (x < x1 - 8) {
+        var w = Math.min([30, 40, 40, 50, 60, 80, 100][Math.floor(R() * 7)], x1 - x);
+        c += cell(x, y0, w, flip); x += w;
+      }
+      return c;
+    }
+    for (var k = -1; k < 12; k++) {
+      var y0 = 60 + 80 * k, flip = k % 2 === 0;
+      if (k === 5) {
+        s += fill(-20, 450, y0, flip) + fill(550, 1020, y0, flip);
+        s += '<g transform="translate(500 500) scale(0.125) translate(-500 -500)">' + inverter(false) + '</g>';
+        s += '<rect class="target" x="450" y="460" width="100" height="80"/>';
+      } else {
+        s += fill(-20 + R() * 20, 1020, y0, flip);
+      }
+    }
+    for (var r = -1; r < 13; r++) s += '<rect class="m1" x="-20" y="' + (56 + 80 * r) + '" width="1040" height="8"/>';
+    for (var m = 0; m < 26; m++) {
+      var yy = 60 + 80 * Math.floor(R() * 12) + 38 + (R() < 0.5 ? -3 : 3), xa = R() * 900, xb = xa + 60 + R() * 260;
+      if (yy > 450 && yy < 550 && xa < 560 && xb > 440) continue;
+      s += '<line class="m2" x1="' + f1(xa) + '" y1="' + yy + '" x2="' + f1(xb) + '" y2="' + yy + '"/>' +
+           '<rect x="' + f1(xa - 3) + '" y="' + (yy - 3) + '" width="6" height="6" fill="#e0a560"/><rect x="' + f1(xb - 3) + '" y="' + (yy - 3) + '" width="6" height="6" fill="#e0a560"/>';
+    }
+    s += '<text class="lgd" x="30" y="52" fill="#9fb2d8">VDD</text><text class="lgd" x="30" y="132" fill="#9fb2d8">GND</text>';
+    return s;
+  }
+
+  /* Nivel 3: el inversor en grande, con electrones y huecos. */
+  function levelTransistor() {
+    return '<rect width="1000" height="1000" fill="#131720"/>' + inverter(true);
+  }
+
+  /* Nivel 4: la red de silicio bajo la compuerta. */
+  function levelLattice() {
+    var R = rng(55), s = '<rect width="1000" height="1000" fill="#0f131c"/>', b = '', a = '', p = '', f = '';
+    for (var i = 0; i <= 10; i++) {
+      for (var j = 0; j <= 10; j++) {
+        var x = i * 100, y = j * 100;
+        if (i < 10) { b += '<line class="bond" x1="' + x + '" y1="' + y + '" x2="' + (x + 100) + '" y2="' + y + '"/>'; p += '<circle class="pair" cx="' + (x + 44) + '" cy="' + (y - 7) + '" r="4.5"/><circle class="pair" cx="' + (x + 56) + '" cy="' + (y + 7) + '" r="4.5"/>'; }
+        if (j < 10) { b += '<line class="bond" x1="' + x + '" y1="' + y + '" x2="' + x + '" y2="' + (y + 100) + '"/>'; p += '<circle class="pair" cx="' + (x - 7) + '" cy="' + (y + 44) + '" r="4.5"/><circle class="pair" cx="' + (x + 7) + '" cy="' + (y + 56) + '" r="4.5"/>'; }
+        a += '<circle class="atom" cx="' + x + '" cy="' + y + '" r="24"/><text class="si" x="' + x + '" y="' + (y + 6) + '" text-anchor="middle">Si</text>';
+      }
+    }
+    for (var e = 0; e < 16; e++) {
+      f += '<circle class="free" cx="-50" cy="' + (50 + 100 * Math.floor(R() * 10)) + '" r="8" style="animation-duration:' + (3 + R() * 3).toFixed(2) + 's;animation-delay:-' + (R() * 6).toFixed(2) + 's"/>';
+    }
+    return s + b + p + a + f;
+  }
+
+  var builders = [levelChip, levelDie, levelCells, levelTransistor, levelLattice];
+  layers.forEach(function (svg, i) {
+    var g = svg.firstElementChild;
+    var body = builders[i]();
+    if (i >= 2) {
+      // Bordes suaves: el nivel entra como un recorte redondo, no como un cuadrado duro.
+      var id = 'soft' + i;
+      svg.insertAdjacentHTML('afterbegin', '<defs><radialGradient id="g' + id + '"><stop offset=".62" stop-color="#fff"/><stop offset="1" stop-color="#000"/></radialGradient><mask id="' + id + '" maskContentUnits="userSpaceOnUse"><rect width="1000" height="1000" fill="url(#g' + id + ')"/></mask></defs>');
+      g.innerHTML = '<g mask="url(#' + id + ')">' + body + '</g>';
+    } else {
+      g.innerHTML = body;
+    }
+  });
+
+  var captions = [
+    ['01 · Encapsulado', 'Del chip al electrón, y de vuelta.', 'Un QFP de 48 patitas soldado a una placa. Baja y entra: cada nivel está 8 veces más adentro que el anterior.'],
+    ['02 · Die', 'Su plano es un diagrama de bloques.', 'Bajo la tapa está el die de silicio, cableado con hilos de oro. Σ, G(s), H(s) y un bus que realimenta la salida: el mismo lazo que resuelve BlockLab.'],
+    ['03 · Celdas estándar', 'Cada bloque, miles de compuertas.', 'G(s) son filas de celdas lógicas alineadas entre los rieles de VDD y GND.'],
+    ['04 · Transistor', 'Una compuerta, dos transistores.', 'Un inversor CMOS: cuando la entrada sube, conduce el NMOS y la salida baja; cuando baja, conduce el PMOS.'],
+    ['05 · Silicio', 'Y en el canal, electrones.', 'Átomos de silicio enlazados y electrones libres que cruzan cuando la compuerta lo permite. De aquí sale todo lo demás.'],
+    ['06 · De vuelta', 'Del electrón al sistema de control.', 'Ahora sube un par de niveles de abstracción y resuelve el lazo completo.'],
+  ];
+  var cap = document.getElementById('diveCaption'), capK = cap.querySelector('.k'), capH = cap.querySelector('h2'), capP = cap.querySelector('p');
+  var rail = [].slice.call(document.querySelectorAll('#diveRail li'));
+  var hint = document.getElementById('diveHint'), nav = document.getElementById('nav'), stage = dive.firstElementChild;
+  var current = -1, swapTimer = 0, lid = document.getElementById('lid');
+
+  function showCaption(i) {
+    if (i === current) return;
+    current = i;
+    cap.classList.add('swap');
+    clearTimeout(swapTimer);
+    swapTimer = setTimeout(function () {
+      capK.textContent = captions[i][0]; capH.textContent = captions[i][1]; capP.textContent = captions[i][2];
+      cap.classList.remove('swap');
+    }, 180);
+    rail.forEach(function (li, k) { li.classList.toggle('on', k === Math.min(i, 4)); });
+  }
+
+  var END = 4.6;
+  function smooth(a, b, x) { x = Math.min(1, Math.max(0, (x - a) / (b - a))); return x * x * (3 - 2 * x); }
+
+  function frame() {
+    var r = dive.getBoundingClientRect();
+    var total = r.height - innerHeight;
+    var p = Math.min(1, Math.max(0, -r.top / total));
+    var t = p * END;
+    layers.forEach(function (el, i) {
+      var fin = i === 0 ? 1 : smooth(i - 0.65, i - 0.3, t);
+      var fout = i === 4 ? 1 - smooth(4.3, 4.6, t) : 1 - smooth(i + 0.7, i + 1.0, t);
+      var o = fin * fout;
+      if (o < 0.005) { el.style.display = 'none'; return; }
+      el.style.display = '';
+      el.style.opacity = o.toFixed(3);
+      var sc = Math.pow(8, t - i);
+      el.firstElementChild.setAttribute('transform', 'translate(500 500) scale(' + sc.toFixed(4) + ') translate(-500 -500)');
+    });
+    lid.style.opacity = (1 - smooth(0.25, 0.6, t)).toFixed(3);
+    stage.style.opacity = (1 - smooth(4.4, 4.6, t)).toFixed(3);
+    hint.style.opacity = (1 - smooth(0.05, 0.3, t)).toFixed(3);
+    showCaption(t < 0.5 ? 0 : t < 1.5 ? 1 : t < 2.5 ? 2 : t < 3.5 ? 3 : t < 4.25 ? 4 : 5);
+    nav.classList.toggle('on-dark', r.bottom > 60 && t < 4.45);
+  }
+
+  var queued = false;
+  addEventListener('scroll', function () {
+    if (queued) return;
+    queued = true;
+    requestAnimationFrame(function () { queued = false; frame(); });
+  }, { passive: true });
+  addEventListener('resize', frame);
+  frame();
+})();
+
+/* ───────────── Laboratorio: brazo con control proporcional ─────────────
+   Motor con retardo τa·τ' = K(r − θ) − τ y brazo J·θ'' = τ − b·θ'. Lazo:
+   C/R = K / (0.1s³ + 1.4s² + 4s + K), estable para K < 56 (Routh). */
+(function () {
+  var J = 1, B = 4, TA = 0.1, KCRIT = B * (J + TA * B) / (TA * J), D = Math.PI / 180;
+  var slider = document.getElementById('gainK'), out = document.getElementById('gainOut');
+  var statusEl = document.getElementById('status'), link = document.getElementById('armLink');
+  var goal = document.getElementById('armGoal'), read = document.getElementById('armRead'), led = document.getElementById('armLed');
+  var canvas = document.getElementById('scope'), ctx = canvas.getContext('2d');
+  var tfNum = document.getElementById('tfNum'), tfK = document.getElementById('tfK');
+  var reduced = matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+  var K = +slider.value, th = 20 * D, w = 0, tau = 0, ref = 20 * D, time = 0, lastKick = 0, blown = 0;
+  var hist = [], WINDOW = 8;
+
+  function describe() {
+    // Discriminante del denominador cúbico: > 0, tres polos reales; < 0, un par complejo.
+    var a = TA * J, b = J + TA * B, c = B, d = K;
+    var disc = 18 * a * b * c * d - 4 * b * b * b * d + b * b * c * c - 4 * a * c * c * c - 27 * a * a * d * d;
+    statusEl.classList.toggle('bad', K >= KCRIT);
+    if (K > KCRIT) return '<b>Inestable.</b> Hay polos en el semiplano derecho: cada oscilación es más grande que la anterior.';
+    if (K === KCRIT) return '<b>Límite de estabilidad.</b> Polos sobre el eje imaginario: oscila para siempre sin crecer ni apagarse.';
+    if (disc > 0) return '<b>Sobreamortiguado.</b> Todos los polos son reales: llega sin pasarse, pero despacio.';
+    if (K < 30) return '<b>Subamortiguado.</b> Un par de polos complejos: se pasa del objetivo y oscila antes de asentarse.';
+    return '<b>Muy poco amortiguado.</b> Los polos se acercan al eje imaginario: oscila mucho y tarda en calmarse.';
+  }
+  function setK(v) {
+    K = v; out.textContent = v; tfNum.textContent = v; tfK.textContent = v;
+    statusEl.innerHTML = describe();
+  }
+  slider.addEventListener('input', function () { setK(+slider.value); });
+  function kick() { ref = ref < 45 * D ? 75 * D : 20 * D; lastKick = time; }
+  document.getElementById('kick').addEventListener('click', kick);
+  setK(K);
+
+  function step(dt) {
+    var u = K * (ref - th);
+    tau += (u - tau) / TA * dt;
+    w += (tau - B * w) / J * dt;
+    th += w * dt;
+    if (Math.abs(th - ref) > 2.5 && !blown) blown = time;
+    if (blown && time - blown > 1.2) { th = ref; w = 0; tau = 0; blown = 0; hist = []; }
+  }
+
+  function palette() {
+    var cs = getComputedStyle(document.documentElement);
+    return { grid: '#16301f', axis: '#2a4a38', txt: '#6f8479', out: '#7cf0b5', ref: '#e39a57', ink: cs.getPropertyValue('--ink') };
+  }
+  var pal = palette();
+
+  function draw() {
+    var ang = Math.max(-80, Math.min(200, th / D));
+    link.setAttribute('transform', 'translate(130 235) rotate(' + (-ang).toFixed(2) + ')');
+    goal.setAttribute('transform', 'rotate(' + (-ref / D).toFixed(2) + ' 130 235)');
+    read.textContent = 'θ = ' + Math.round(th / D) + '°  ·  objetivo ' + Math.round(ref / D) + '°';
+    led.classList.toggle('on', Math.abs(tau) > 0.5 && Math.floor(time * 8) % 2 === 0);
+
+    var W = canvas.width, H = canvas.height;
+    ctx.clearRect(0, 0, W, H);
+    ctx.strokeStyle = pal.grid; ctx.lineWidth = 1;
+    for (var gx = 0; gx <= 8; gx++) { ctx.beginPath(); ctx.moveTo(gx * W / 8, 0); ctx.lineTo(gx * W / 8, H); ctx.stroke(); }
+    for (var gy = 0; gy <= 6; gy++) { ctx.beginPath(); ctx.moveTo(0, gy * H / 6); ctx.lineTo(W, gy * H / 6); ctx.stroke(); }
+    var y = function (deg) { return H - (deg + 10) / 120 * H; };
+    ctx.fillStyle = pal.txt; ctx.font = (12 * W / 400) + 'px JetBrains Mono, monospace';
+    [0, 45, 90].forEach(function (v) { ctx.fillText(v + '°', 6, y(v) - 4); });
+    if (hist.length < 2) return;
+    var t0 = time - WINDOW;
+    function plot(key, color, dash) {
+      ctx.strokeStyle = color; ctx.lineWidth = 2.2 * W / 400; ctx.setLineDash(dash); ctx.beginPath();
+      hist.forEach(function (h, i) {
+        var X = (h.t - t0) / WINDOW * W, Y = Math.max(-5, Math.min(H + 5, y(h[key])));
+        i ? ctx.lineTo(X, Y) : ctx.moveTo(X, Y);
+      });
+      ctx.stroke(); ctx.setLineDash([]);
+    }
+    plot('r', pal.ref, [8 * W / 400, 6 * W / 400]);
+    plot('o', pal.out, []);
+  }
+
+  function size() {
+    var dpr = Math.min(2, devicePixelRatio || 1), rect = canvas.getBoundingClientRect();
+    canvas.width = Math.round(rect.width * dpr); canvas.height = Math.round(rect.width * 0.75 * dpr);
+  }
+  size(); addEventListener('resize', size);
+
+  var running = false, prev = 0;
+  function loop(ts) {
+    if (!running) return;
+    var dt = Math.min(0.05, (ts - prev) / 1000 || 0.016); prev = ts;
+    var n = Math.ceil(dt / 0.002);
+    for (var i = 0; i < n; i++) { step(dt / n); time += dt / n; }
+    if (time - lastKick > 4.5) kick();
+    hist.push({ t: time, o: th / D, r: ref / D });
+    while (hist.length && hist[0].t < time - WINDOW) hist.shift();
+    draw();
+    requestAnimationFrame(loop);
+  }
+  if (reduced) { draw(); return; }
+  new IntersectionObserver(function (entries) {
+    var vis = entries[0].isIntersecting;
+    if (vis && !running) { running = true; prev = performance.now(); requestAnimationFrame(loop); }
+    if (!vis) running = false;
+  }, { threshold: 0.15 }).observe(document.getElementById('en-vivo'));
+  draw();
+})();
 </script>
 </body>
 </html>
